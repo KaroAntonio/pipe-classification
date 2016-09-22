@@ -1,4 +1,4 @@
-hours: 2
+hours: 3
 
 :: DATABASE MERGING ::
 for Break records
