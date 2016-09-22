@@ -1,13 +1,4 @@
-W/O #,St Name,"Service
-Request #","No. of
-Breaks",Total Break Score,Total Breaks Level,Recent Number of Break,Recent Number of Breaks Score,Recent Number of Breaks Level,W/O Date,SRC,"Asset
-Type",Mat,Dia mm,FROM NODE,"TO
-NODE","Failure
-Type","Failure
-Cause","W/M
-Depth m","Soil
-Type",Lenght m,Operation Cost,Maintenance Cost,Replacement Cost,Maintenance Index,MI Scores,MI Level,Street,Installation Date,Installation Year,Remaining Service Life ,Remaining Service Life Score,Remaining Service Life Level,Condition Score,TotalCondition Level,Current PAN #,"Pres
-Zone",Zone,Tile
+W/O #,St Name,Service Request #,No. of Breaks,Total Break Score,Total Breaks Level,Recent Number of Break,Recent Number of Breaks Score,Recent Number of Breaks Level,W/O Date,SRC,Asset Type,Mat,Dia mm,FROM NODE,TO NODE,Failure Type,Failure Cause,W/M Depth m,Soil Type,Lenght m,Operation Cost,Maintenance Cost,Replacement Cost,Maintenance Index,MI Scores,MI Level,Street,Installation Date,Installation Year,Remaining Service Life ,Remaining Service Life Score,Remaining Service Life Level,Condition Score,TotalCondition Level,Current PAN #,Pres Zone,Zone,Tile
   1905928,ASHURST CR,2192182,1,5,Medium,0,0,Low,02-05-2014,C_UT,WMN,DI,150,599353,599351,1.3,8.1,2,CLAY,34,11.9,17,877,0.0329532497,10,Medium,ASHURST CR,01-01-1979,1905,43,5,Medium,160,Very Low,630,6,B44,0951
   1844041,BARTLEY BULL PKWY,2142110,1,5,Medium,0,0,Low,05-02-2014,C_UT,WMN,CI,250,597569,597122,1.2,8.2,2,CLAY,56,19.6,28,1171,0.0406490179,10,Medium,BARTLEY BULL PKWY,01-01-1967,1905,31,5,Medium,160,Very Low,780,5,B60,0715
   1943385,CAMBERLEY CR,2243392,1,5,Medium,0,0,Low,07-07-2014,C_UT,WMN,DI,150,599314,599178,1.3,8.5,1.7,CLAY,20,7,10,877,0.0193842645,10,Medium,CAMBERLEY CR,01-01-1978,1905,42,5,Medium,160,Very Low,590,6,B43,0922

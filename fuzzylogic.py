@@ -9,6 +9,16 @@ def load_data( fid ):
 			rows += [row]
 	return rows	
 
+def save_data( fid, data, fieldnames=None ):
+	if not fieldnames:
+		fieldnames = list(data[0])
+
+	with open( fid, 'w' ) as csvfile:
+		writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+		writer.writeheader()
+		for row in data:
+			writer.writerow(row)
+
 def line_y_intersect(x, p1, p2):
 	'''
 	p1, p2: (px,py)
@@ -158,7 +168,7 @@ def average_missing( data ):
 	fill in missing values with the average of the column
 	'''
 
-def test_condition_model(fid, params_fid):
+def test_condition_model(fid, params_fid, out_fid=None):
 	'''
 	fid: dataset path
 	'''
@@ -181,7 +191,7 @@ def test_condition_model(fid, params_fid):
 	count = 0
 	for row in data:
 		rl = float(row['Remaining Service Life '])
-		tb = float(row['No. of\nBreaks'] )
+		tb = float(row['No. of Breaks'] )
 		rb = float(row['Recent Number of Break']  )
 		mi = float(row['Maintenance Index'])
 		cl = row['TotalCondition Level']
@@ -189,6 +199,7 @@ def test_condition_model(fid, params_fid):
 		out = condition_model(params, x)
 		cl_out  = cl_map[round(out)]
 		diff = cl_map_inv[cl] - cl_map_inv[cl_out]
+		row['condition_model'] = cl_out
 
 		# TRACK RESULTS
 		count += 1
@@ -198,6 +209,13 @@ def test_condition_model(fid, params_fid):
 
 	diff_ratio = { k:diffs[k]/float(count) for k in diffs }	
 	print( diff_ratio )
+	
+	# Save Predictions
+	if out_fid == None:
+		out_fid = 'out/'+fid.split('/')[-1]
+
+	save_data(out_fid, data)
+
 
 def save_model_params( fid, params ):
 	'''
@@ -416,6 +434,6 @@ def criticality_model( pd, es, ac ):
 
 if __name__ == "__main__":
 	params_fid = 'models/condition_model_opt.csv'
-	test_condition_model('data/condition_data_2014.csv', params_fid )
+	test_condition_model('data/csv/condition_data_2014.csv', params_fid )
 	
 

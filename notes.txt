@@ -1,0 +1,25 @@
+for Break records
+if breaks record break rate > 5, it was replaced, else repaired
+if not in break record assume pipe was fine
+if age of the pipe < 40/50 yrs old it's probably in good shape, considered 'new'
+	* the oldest pipes are 36 years old
+
+W/O date is repair date	
+num recent breaks, is repair in last 5 years, (before 2010)
+remaaining service life is based on formula from condition model
+mi = remaining servi
+pipe type: in transmission
+hydr capacity: 
+env sensitive: count of close landmarks in trans data
+accessibility: esa (easement col), calc, if there are any crossings, then easement is 1, else 0
+conformance: calc from chart
+water quality: chart
+
+TODO
+create written explanation of components
+1. Model Representation
+2. Bounds Implementation
+3. Bounds Combination
+4. Training 
+
+add output of condition model as col in csv
