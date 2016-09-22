@@ -1,3 +1,6 @@
+hours: 2
+
+:: DATABASE MERGING ::
 for Break records
 if breaks record break rate > 5, it was replaced, else repaired
 if not in break record assume pipe was fine
@@ -15,11 +18,3 @@ accessibility: esa (easement col), calc, if there are any crossings, then easeme
 conformance: calc from chart
 water quality: chart
 
-TODO
-create written explanation of components
-1. Model Representation
-2. Bounds Implementation
-3. Bounds Combination
-4. Training 
-
-add output of condition model as col in csv

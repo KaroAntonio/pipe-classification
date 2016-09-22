@@ -435,5 +435,3 @@ def criticality_model( pd, es, ac ):
 if __name__ == "__main__":
 	params_fid = 'models/condition_model_opt.csv'
 	test_condition_model('data/csv/condition_data_2014.csv', params_fid )
-	
-

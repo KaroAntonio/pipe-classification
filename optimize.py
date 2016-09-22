@@ -69,7 +69,7 @@ def condition_loss(vec, params, data):
 	diffs = []
 	for row in data:
 		rl = float(row['Remaining Service Life '])
-		tb = float(row['No. of\nBreaks'] )
+		tb = float(row['No. of Breaks'] )
 		rb = float(row['Recent Number of Break']  )
 		mi = float(row['Maintenance Index'])
 		cl = row['TotalCondition Level']
@@ -112,7 +112,7 @@ def data_to_arff( data, arff_fid ):
 	headers = ['rl','tb','rb','mi','cl']
 	for row in data:
 		rl = float(row['Remaining Service Life '])
-		tb = float(row['No. of\nBreaks'] )
+		tb = float(row['No. of Breaks'] )
 		rb = float(row['Recent Number of Break']  )
 		mi = float(row['Maintenance Index'])
 		cl = cl_map_inv[row['TotalCondition Level']]
@@ -122,7 +122,7 @@ def data_to_arff( data, arff_fid ):
 
 def optimize_condition_model(params0,n=1):
 
-	data = load_data( 'data/condition_data_2014.csv' )
+	data = load_data( 'data/csv/condition_data_2014.csv' )
 	loss = get_loss(condition_loss, params0, data)
 	x0 = params_to_vec(params0)
 	for i in range(n):
@@ -135,9 +135,9 @@ def optimize_condition_model(params0,n=1):
 	return res.x
 	
 if __name__ == '__main__':
-	data = load_data( 'data/condition_data_2014.csv' )
-	data_to_arff(data, 'data/condition_data_2014.arff' )	
-	set_arff_nominal('data/condition_data_2014.arff', {'cl':get_cl_map()})
+	data = load_data( 'data/csv/condition_data_2014.csv' )
+	data_to_arff(data, 'data/csv/condition_data_2014.arff' )	
+	set_arff_nominal('data/csv/condition_data_2014.arff', {'cl':get_cl_map()})
 
 	# load best params
 	best_params = load_model_params( 'models/condition_model_opt.csv' )
