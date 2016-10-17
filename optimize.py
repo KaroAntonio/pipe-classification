@@ -1,5 +1,4 @@
 import numpy as np
-import arff
 from scipy.optimize import minimize
 from fuzzylogic import *
 
@@ -9,10 +8,10 @@ def params_to_vec( params ):
 	ignore 0s and infs, they are assumed to be correct
 	'''
 	vec = []
-	param_vars = params.keys()	
+	param_vars = list(params.keys())
 	param_vars.sort()
 	for var in param_vars:
-		grades = params[var].keys()
+		grades = list(params[var].keys())
 		grades.sort()
 		for grade in grades:
 			vec += [e for e in params[var][grade] if e not in [0, float('inf')]]
@@ -26,11 +25,11 @@ def vec_to_params( vec, params ):
 	vec = list(vec)
 	idx = 0  # vec index
 	new_params = {}
-	param_vars = params.keys()	
+	param_vars = list(params.keys()	)
 	param_vars.sort()
 	for var in param_vars:
 		new_params[var] = {}
-		grades = params[var].keys()
+		grades = list(params[var].keys())
 		grades.sort()
 		for grade in grades:
 			bounds = params[var][grade]
@@ -85,24 +84,27 @@ def get_loss(f, params, data):
 	return obj_func
 
 def set_arff_nominal( path, nominals ):
-        # Cleanse .arff
-        f = open(path)
-        lines = f.readlines()
-        f.close()
-        f = open(path, 'w')
-        for line in lines:
-			# NOMINAL correct class attributes to nominal
-			if line[0] == '@' and "{" not in line:
-				parts = line.split()
-				for c in nominals:
-					if c in parts:
-						cs = [str(e) for e in nominals[c]]
-						parts[2] = "{"+", ".join(cs) + "}"
-				line = " ".join(parts)+"\n"
+	# Cleanse .arff
+	f = open(path)
+	lines = f.readlines()
+	f.close()
+	f = open(path, 'w')
+	for line in lines:
+		# NOMINAL correct class attributes to nominal
+		if line[0] == '@' and "{" not in line:
 
-			f.write(line)
-        f.close()
+			parts = line.split()
+			for c in nominals:
+				if c in parts:
+					cs = [str(e) for e in nominals[c]]
+					parts[2] = "{"+", ".join(cs) + "}"
+			line = " ".join(parts)+"\n"
 
+		f.write(line)
+	f.close()
+
+# ADD back when arff is possible
+'''
 def data_to_arff( data, arff_fid ):
 
 	cl_map = get_cl_map()
@@ -118,7 +120,7 @@ def data_to_arff( data, arff_fid ):
 		cl = cl_map_inv[row['TotalCondition Level']]
 		arff_data += [[rl,tb,rb,mi,cl]]
 	arff.dump( arff_fid, arff_data, names=headers)
-
+'''
 
 def optimize_condition_model(params0,n=1):
 
@@ -136,8 +138,8 @@ def optimize_condition_model(params0,n=1):
 	
 if __name__ == '__main__':
 	data = load_data( 'data/csv/condition_data_2014.csv' )
-	data_to_arff(data, 'data/csv/condition_data_2014.arff' )	
-	set_arff_nominal('data/csv/condition_data_2014.arff', {'cl':get_cl_map()})
+	# data_to_arff(data, 'data/csv/condition_data_2014.arff' )	
+	# set_arff_nominal('data/csv/condition_data_2014.arff', {'cl':get_cl_map()})
 
 	# load best params
 	best_params = load_model_params( 'models/condition_model_opt.csv' )
