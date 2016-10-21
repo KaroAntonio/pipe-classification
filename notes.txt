@@ -1,4 +1,4 @@
-hours: 3
+hours: 0
 
 :: DATABASE MERGING ::
 for Break records
@@ -17,4 +17,42 @@ env sensitive: count of close landmarks in trans data
 accessibility: esa (easement col), calc, if there are any crossings, then easement is 1, else 0
 conformance: calc from chart
 water quality: chart
+
+
+Condition Score
+RSL: remaining life
+MI: maintenance index
+* generate total number of breaks
+* generate recent number of breaks < total num breaks
+RSL: remaining service life score
+
+PCSDesc: Expert Opinion
+AR: Expert Opinion
+
+BRKS_FVYRS_SCR
+Score = SUM () * 8
+
+Criticality Score
+CRITICAL_SCR: expert opinion
+(DIAMETER SCR+ ENVMT SCR+ ACCESS SCR)*6
+
+Performance Score
+QUALITY_SCR
+STANDARD_CONFOR
+HEAD_LOSS_SCR: hydraulic capacit
+
+^^^ Those three summed and mult by 10
+
+SEVERITY: expert opinion
+
+** We are trying to do better than expert opinion
+
+Input variables:
+DIAMETER, LAND_USE,
+
+FINAL MODEL OUTPUT
+TOTAL PAN Score - High Score correlates to High Mitigation Class
+Mitigation - 1:Do Nothing, 2:Repair, 3:Replace, 4: Upsize
+
+
 

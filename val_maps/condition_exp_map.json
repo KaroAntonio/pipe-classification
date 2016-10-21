@@ -1,0 +1,11 @@
+{
+	"(Catastrophic)":0,
+	"(Catastrophic) - Flow Failure":1,
+	"(Catastrophic) - Not Balanced":2,
+	"(Severe)":3,
+	"(Moderate)":10,
+	"(Low)":13,
+	"(Negligible)":18,
+	"Inactive/Closed":19,
+	"Segment Removed":20
+}

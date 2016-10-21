@@ -1,5 +1,6 @@
 from random import random as rand
-import csv
+import random
+import csv,json
 
 def load_data( fid ):
 	with open( fid, 'r' ) as csvfile:
@@ -8,6 +9,15 @@ def load_data( fid ):
 		for row in data_reader:
 			rows += [row]
 	return rows	
+
+def gen_col( data, name, b):
+	'''
+	generate a column in the data s.t. in the range 0,b
+	where b, are strings that evaluate under
+	eval(a)
+	'''
+	for row in data:
+		row[name] = int(rand() * eval(b))
 
 def save_data( fid, data, fieldnames=None ):
 	if not fieldnames:
@@ -47,7 +57,6 @@ def seg_deg_membership(i, x, bounds):
 			# UPDATE WITH LINE Y FUNC
 			p1 = (bounds[i], 0)
 			p2 = (bounds[i+1],1)
-			# print( x, p1,p2 , line_y_intersect(x, p1, p2)  )
 			return line_y_intersect(x, p1, p2) 
 
 	# IF plateau segment
@@ -147,10 +156,9 @@ def membership( x, memberships ):
 
 	# FIND degree of membership to each bound
 	degrees = membership_degrees(x, memberships)
-
 	# NORMALIZE degrees to probabilities
 	total = sum([degrees[k] for k in degrees])
-	degrees = {l:degrees[l]/total for l in degrees};
+	if total: degrees = {l:degrees[l]/total for l in degrees};
 
 	#return choose_membership( degrees )
 	return weighted_sum( degrees )
@@ -167,8 +175,84 @@ def average_missing( data ):
 	missing values are None types
 	fill in missing values with the average of the column
 	'''
+	pass
 
-def test_condition_model(fid, params_fid, out_fid=None):
+def test_criticality_model(fid, params_fid, out_fid=None):
+
+	data = load_data( fid )
+	params = load_model_params( params_fid )
+	diffs = {}
+	count = 0
+	for row in data:
+		x = { k:row[v] for k,v in var_map.items() if k != 'out' }
+		out = criticality_model(params, x)
+		print(out*100, row[var_map['out']])
+
+def test_performance_model(fid, params_fid, out_fid=None):
+	
+	data = load_data( fid )
+	params = load_model_params( params_fid )
+
+	'''
+	var_map = {
+		'pt': Pipe Type
+		'hc': Hydraulic Capacity
+		'qy': Quality
+		'cs': Conformance to Standard
+		'pd': Pipe Diameter (mm)
+		}
+		'''
+
+def condition_calc_out(row):
+		# the calculated output
+		# true out in [0,60]
+		out_cols = [
+				row['BRK_SCR'],
+				row['RSL_SCR'],
+				int(row['BRKS_FVYRS_SCR'])*3,
+				row['MI_SCR']
+				]
+		return sum(int(e) for e in out_cols)/60.
+
+def criticality_exp_out(p,row):
+	val = row['CRITICAL_SCR'].strip()
+	try:
+		ret = float(val)/1000
+	except:
+		if val == '`':
+			ret=0
+		else:
+			print(val)
+
+	return ret
+
+def condition_exp_out(p,row):
+	k = row['PCSDesc'].strip()
+	return p['val_map'][k]/20.
+
+def model_loss(p):
+	# data, params, model, var_map, out_func
+	# unpack params to vars
+	data = p['data']
+	var_map = p['var_map']
+	model = p['model']
+	params = p['params']
+	out_f = p['out_f']
+
+	diffs = []
+	# take the loss for a random sampling of rows
+	#n = 50
+	n = len(data)
+	i0 = int(rand() * (len(data)-n-1))
+	for row in data[i0:i0+n]:
+		x = { k:row[v] for k,v in var_map.items() if k != 'out' }
+		m_out = model(params, x) 
+		out = out_f(p,row)
+		diffs += [abs(out-m_out)]
+
+	return sum(diffs)/len(diffs)
+
+def test_condition_model_old(fid, params_fid, out_fid=None):
 	'''
 	fid: dataset path
 	'''
@@ -216,7 +300,6 @@ def test_condition_model(fid, params_fid, out_fid=None):
 
 	save_data(out_fid, data)
 
-
 def save_model_params( fid, params ):
 	'''
 	save model params to file fid
@@ -239,20 +322,35 @@ def load_model_params( fid ):
 	except:
 		return None
 	
-	try:
-		params = {}
-		for line in f:
-			parts = line.split(',')
-			parts = [e.strip() for e in parts]
-			if 'var' not in parts:
-				if parts[0] not in params:
-					params[parts[0]] = {}
-				params[parts[0]][int(parts[1])] = [float(e) for e in parts[2:]]
-	except: 
-		print('Parse Error')
-		return None
+	params = {}
+	for line in f:
+		if not line.strip(): 
+			print('Err: blank line in params')
+			raise Exception
+		parts = line.split(',')
+		parts = [e.strip() for e in parts]
+		if 'var' not in parts:
+			if parts[0] not in params:
+				params[parts[0]] = {}
+			params[parts[0]][int(parts[1])] = [float(e) for e in parts[2:]]
+
 	f.close()
 	return params
+
+def criticality_model( params, x ):
+	'''
+	params: model params
+	x: input vars in dict
+
+	pd: Pipe Diameter
+	es: Environmental Sensitivity
+	ac: Accessibility
+	'''
+	# For each input variable (rl, tb, ...) find membership given bounds
+	memberships = {var:membership(float(x[var]),params[var]) for var in x}
+
+	out = sum(memberships.values()) * 2./9
+	return membership( out, params['out'])/float(max(params['out'].keys()))
 
 def condition_model( params, x ):
 	'''
@@ -267,171 +365,63 @@ def condition_model( params, x ):
 	'''
 	memberships = {}
 	# For each input variable (rl, tb, ...) find membership given bounds
-	for var in x:
-		memberships[var] = membership(x[var], params[var])
+	memberships = {var:membership(float(x[var]),params[var]) for var in x}
+	out = sum(memberships.values()) * 1./8
 
-	out = sum(memberships.values()) * 1./6
+	return membership( out, params['out'])/7.
 
-	return membership( out, params['out'])
+def gen_brks_cols():
+	data_fid = 'data/csv/all_data.csv'
+	data= load_data('data/csv/all_data.csv')
+	gen_col(data,'TotBrks','200')
+	gen_col(data,'BRKS_FVYRS_SCR','row["TotBrks"]')
+	save_data('data/csv/all_data_2.csv',data)
 
-
-def condition_model_static(rl, tb, rb, mi ):
-	'''
-	rl: Remaining Life
-	tb: Total Breaks
-	rb: Recent Number of Breaks
-	mi: Maintenance Index	
-	return an integer condition rating
-	'''
-
-	# NOTE what are the mi bounds? 
-	# desc is in range 0 - 5%, bounds is in (0,0.06)...?
-	# should the bounds at the top end always go to infinity ...?
-
-	rl_bounds = {
-			0: [45,53,54, float('inf')],
-			5: [25,33,48,55],
-			15: [10,17,28,35],
-			20: [0,0,12,20] 
+def get_condition_params():
+	return {
+			'model_name': 	'condition_model',
+			'model':		condition_model, 
+			'var_map': 		'var_maps/condition_var_map.json',
+			#'out_f':		condition_calc_out,
+			'out_f':		condition_exp_out,
+			'val_map':  	'val_maps/condition_exp_map.json',
+			'params':		'models/condition_model_opt.csv'
 			}
 
-	tb_bounds = {
-			0: [0,0,1,2],
-			5: [0,2,4.5, 6],
-			15: [4,5.5,8,10],
-			20: [8,9,10,float('inf')]
+def get_criticality_params():
+	return {
+			'model_name': 	'criticality_model',
+			'model':		criticality_model, 
+			'var_map': 		'var_maps/criticality_var_map.json',
+			'out_f':		criticality_exp_out,
+			'params':		'models/criticality_model.csv'
 			}
 
-	rb_bounds = {
-			0: [0,0,0.5,1],
-			5: [0.5,1,2.5,3],
-			15: [2.5,3,4.5,5],
-			20: [4.5,5,6,float('inf')]
-			}
-	
-	mi_bounds = {
-			5: [0,0,0.01,0.02],
-			10: [0.01,0.02,0.04,0.05],
-			15: [0.04,0.045,0.06,float('inf')]
-			}
-
-	out_bounds = {
-			1: [0,0,1.75],
-			2: [0,1.75,3.25],
-			3: [1.75,3.25,5],
-			4: [3.25,5,6.5],
-			5: [5,6.5,8],
-			6: [6.5,8,10],
-			7: [8,10,float('inf')]
-			}
-	
-	rl_out = membership( rl, rl_bounds )
-	tb_out = membership( tb, tb_bounds )
-	rb_out = membership( rb, rb_bounds )
-	mi_out = membership( mi, mi_bounds )
-	
-	# print( rl_out, tb_out, rb_out, mi_out )
-	
-	# Input to the condition model bound is the sum of the prior outputs
-	out = sum([rl_out, tb_out, rb_out, mi_out]) * 1./6
-
-	return membership( out, out_bounds )
-
-def performance_model( hc, qy, cs, pd, pt, land_use_type ):
-	'''
-	pt: Pipe Type
-	hc: Hydraulic Capacity
-	qy: Quality
-	cs: Conformance to Standard
-	pd: Pipe Diameter (mm)
-	return an integer performance grade
-	'''
-	if pd >= 600:	
-		hc_bounds = {
-				0:[0,0,1,1.75],
-				15:[1,1.5,2.25,2.75],
-				30:[2,2.5,3.5,float('inf')]
-				}
-	else:
-		hc_bounds = {
-				0:[0,0,1,2.25],
-				15:[1,2,4,5.5],
-				30:[4,5,6,float('inf')]
-				}
-
-	
-	qy_bounds = {
-			0:[0,0,0.5],
-			15:[14.5,15,15.5]
-			}
-
-	inv_land_use_cats = [
-				'Industry',
-				'Schools'
-			]
-	if pd < 19: cs_out = 10
-	elif pd < 100 and pt == "Copper": cs_out = 15
-	elif pd < 300 and land_use_type in inv_land_use_cats : cs_out = 15
-	else: cs_out = 0
-
-	out_bounds = {
-			1: [0,0,1.75],
-			2: [0,1.75,3.25],
-			3: [1.75,3.25,5],
-			4: [3.25,5,6.5],
-			5: [5,6.5,8],
-			6: [6.5,8,10],
-			7: [8,10,float('inf')]
-			}
-
-	hc_out = membership( hc, hc_bounds )
-	qy_out = membership( qy, qy_bounds )
-	cs_out = membership( cs, cs_bounds )
-
-	out = sum([hc_out, qy_out, cs_out]) * 2./9 # 1/6 * 4/3
-	
-	return membership( out, out_bounds )
-	
-
-def criticality_model( pd, es, ac ):
-	'''
-	pd: Pipe Diameter
-	es: Environmentally Sensitive
-	ac: Accessibility
-	'''
-	pd_bounds = {
-			0:[0,0,300,500],
-			10:[300,400,750,850],
-			15:[650,750,float('inf')],
-			}
-
-	es_bounds = {
-			0:[0,0,10],
-			15:[6,15,float('inf')],
-			}
-
-	ac_bounds = {
-			0:[0,0,6],
-			10:[4,8,12],
-			15:[10,16, float('inf')],
-			}
-
-	out_bounds = {
-			2: [0,1.75,3.25],
-			3: [1.75,3.25,5],
-			4: [3.25,5,6.5],
-			5: [5,6.5,8],
-			6: [6.5,8,float('inf')],
-			}
-
-	pd_out = membership( pd, pd_bounds )
-	es_out = membership( es, es_bounds )
-	ac_out = membership( ac, ac_bounds )
-
-	out = sum([pd_out, es_out, ac_out]) * 2./9 # 1/6 * 4/3
-	
-	return membership( out, out_bounds )
 
 if __name__ == "__main__":
-	params_fid = 'models/condition_model_opt.csv'
-	test_condition_model('data/csv/condition_data_2014.csv', params_fid )
+	data_fid = 'out/all_data.csv'
+	data = load_data( data_fid )
+	random.shuffle(data)
+
+	#params = get_condition_params()
+	params = get_criticality_params()
+
+	p = params
+	params['data']=data
+	
+	#update fid with data
+	if 'var_map' in p: p['var_map'] = json.load(open(params['var_map'], 'r'))
+	if 'val_map' in p: params['val_map'] = json.load(open(params['val_map'], 'r'))
+	params['params'] = load_model_params( params['params'] ) 
+
+	loss = model_loss(params)
+	print('loss: ' + str(loss))
+
+	for row in data:
+		out = p['out_f'](p,row)
+		row[p['model_name']] = int(out*8)
+	save_data('out/all_data.csv',data)
+
+
+
+

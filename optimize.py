@@ -1,6 +1,12 @@
 import numpy as np
 from scipy.optimize import minimize
 from fuzzylogic import *
+import random 
+import json
+try:
+	import arff
+except:
+	pass
 
 def params_to_vec( params ):
 	'''
@@ -45,8 +51,7 @@ def vec_to_params( vec, params ):
 	return new_params
 
 def get_cl_map():
-
-	cl_map = {
+	return  {
 			1:'Extremely Low',
 			2:'Very Low',
 			3:'Moderately Low',
@@ -56,9 +61,7 @@ def get_cl_map():
 			7:'Extremely High'
 			}
 
-	return cl_map
-
-def condition_loss(vec, params, data):
+def condition_loss_old(vec, params, data):
 	
 	params = vec_to_params(list(vec), params)
 
@@ -78,10 +81,19 @@ def condition_loss(vec, params, data):
 
 	return sum(diffs)/len(diffs) 
 
-def get_loss(f, params, data):
+def get_loss_old(f, params, data):
 	def obj_func(x):
 		return f(x, params, data)
 	return obj_func
+
+def vec_model_loss(x, p):
+	p['params'] = vec_to_params(list(x), p['params'])
+	return model_loss( p )
+
+def get_loss_f(p):
+	def f(x):
+		return vec_model_loss(x, p)
+	return f 
 
 def set_arff_nominal( path, nominals ):
 	# Cleanse .arff
@@ -92,11 +104,10 @@ def set_arff_nominal( path, nominals ):
 	for line in lines:
 		# NOMINAL correct class attributes to nominal
 		if line[0] == '@' and "{" not in line:
-
 			parts = line.split()
 			for c in nominals:
 				if c in parts:
-					cs = [str(e) for e in nominals[c]]
+					cs = [str(e).replace(' ','_') for e in nominals[c]]
 					parts[2] = "{"+", ".join(cs) + "}"
 			line = " ".join(parts)+"\n"
 
@@ -104,29 +115,46 @@ def set_arff_nominal( path, nominals ):
 	f.close()
 
 # ADD back when arff is possible
-'''
-def data_to_arff( data, arff_fid ):
-
-	cl_map = get_cl_map()
-	cl_map_inv = {cl_map[k]:k for k in cl_map}
+def data_to_arff( data, arff_fid, var_map=None ):
+	if not var_map:headers = list(data[0])
+	else: headers = list(var_map)
 
 	arff_data = []
-	headers = ['rl','tb','rb','mi','cl']
+	types = {}
+	
 	for row in data:
-		rl = float(row['Remaining Service Life '])
-		tb = float(row['No. of Breaks'] )
-		rb = float(row['Recent Number of Break']  )
-		mi = float(row['Maintenance Index'])
-		cl = cl_map_inv[row['TotalCondition Level']]
-		arff_data += [[rl,tb,rb,mi,cl]]
+		clean = []
+		for h in headers:
+			e = row[h]
+			e = e.strip()
+			e = e.replace(' ','_')
+			try:
+				e = float(e)
+			except:
+				pass
+
+			if h not in types:
+				types[h] = type(e)
+
+			if type(e) != types[h]:
+				if type(e) == str and types[h] == float:
+					e = 0.0
+				elif type(e) == float and types[h] == str:
+					e = str(e)
+				else:
+					print(type(e),types[h])
+
+			clean += [e]
+		arff_data += [clean]
+
+	headers = [e.replace(' ','_') for e in headers]
 	arff.dump( arff_fid, arff_data, names=headers)
-'''
 
-def optimize_condition_model(params0,n=1):
+def optimize_model(p, x0,n=1):
 
-	data = load_data( 'data/csv/condition_data_2014.csv' )
-	loss = get_loss(condition_loss, params0, data)
-	x0 = params_to_vec(params0)
+	#data = load_data( 'data/csv/all_data.csv' )
+	data = p['data']
+	loss = get_loss_f(p)
 	for i in range(n):
 		print('loss: {}'.format(loss(x0)))
 		res = minimize(loss, x0, method='BFGS', 
@@ -135,28 +163,48 @@ def optimize_condition_model(params0,n=1):
 
 	return np.array([round(e,2) for e in res.x])
 	return res.x
-	
-if __name__ == '__main__':
-	data = load_data( 'data/csv/condition_data_2014.csv' )
-	# data_to_arff(data, 'data/csv/condition_data_2014.arff' )	
-	# set_arff_nominal('data/csv/condition_data_2014.arff', {'cl':get_cl_map()})
 
+def rand_update_params(params0):
+	return ((np.random.random(len(params0)) *0.3) - 0.15) + params0
+
+def run_optimization(p):
 	# load best params
-	best_params = load_model_params( 'models/condition_model_opt.csv' )
-	best_x = params_to_vec( best_params )
-	loss = get_loss(condition_loss, best_params, data)
-	best_loss = loss(best_x)
+	best_params_vec = params_to_vec( p['params'] )
+	loss = get_loss_f(p)
+	best_loss = loss(best_params_vec)
 	print('best loss: {}'.format(best_loss))
 
 	# randomly update best params and optimize
-	params0 = load_model_params( 'models/condition_model_opt.csv' )
-	rand_vec = (np.random.random(len(params_to_vec(params0))) *0.3) - 0.15
-	rand_params = vec_to_params( best_x + rand_vec, params0 )
-	optimized = optimize_condition_model( rand_params, 2 )
+	rand_params_vec = rand_update_params(best_params_vec)
+	optimized = optimize_model(p, rand_params_vec, 2 )
 	loss0 = loss(optimized)
 
-	if loss0 < best_loss: best_x = optimized
+	if loss0 < best_loss: best_params_vec = optimized
 
 	model_fid = 'models/condition_model_opt.csv'
-	save_model_params(model_fid, vec_to_params(best_x, params0))
+	save_model_params(model_fid, vec_to_params(best_params_vec, p['params']))
 	
+if __name__ == '__main__':
+
+	data_fid = 'data/csv/all_data.csv'
+	data = load_data( data_fid )
+	random.shuffle(data)
+
+	data_to_arff(data, 'data/arff/all_data.arff', var_map=None )	
+
+	nominals = {}
+	nominals['PCSDesc'] = json.load(open('val_maps/condition_exp_map.json', 'r'))
+	set_arff_nominal('data/arff/all_data.arff', nominals)
+
+	#p = get_condition_params()
+	p = get_criticality_params()
+
+	p['data']=data
+
+	#update fid with data
+	p['var_map'] = json.load(open(p['var_map'], 'r'))
+	#p['val_map'] = json.load(open(p['val_map'], 'r'))
+	p['params'] = load_model_params(p['params'] )
+
+	run_optimization(p)
+
