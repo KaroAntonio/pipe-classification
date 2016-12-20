@@ -203,6 +203,13 @@ def test_performance_model(fid, params_fid, out_fid=None):
 		}
 		'''
 
+def performance_exp_out(p,row):
+	val = row['SEVERITY'].strip()
+	try:
+		return float(val)
+	except:
+		return val
+
 def condition_calc_out(row):
 		# the calculated output
 		# true out in [0,60]
@@ -230,7 +237,7 @@ def condition_exp_out(p,row):
 	k = row['PCSDesc'].strip()
 	return p['val_map'][k]/20.
 
-def model_loss(p):
+def model_loss(p,n=50):
 	# data, params, model, var_map, out_func
 	# unpack params to vars
 	data = p['data']
@@ -240,16 +247,13 @@ def model_loss(p):
 	out_f = p['out_f']
 
 	diffs = []
-	# take the loss for a random sampling of rows
-	#n = 50
-	n = len(data)
+	if not n: n = len(data)
 	i0 = int(rand() * (len(data)-n-1))
 	for row in data[i0:i0+n]:
 		x = { k:row[v] for k,v in var_map.items() if k != 'out' }
 		m_out = model(params, x) 
 		out = out_f(p,row)
 		diffs += [abs(out-m_out)]
-
 	return sum(diffs)/len(diffs)
 
 def test_condition_model_old(fid, params_fid, out_fid=None):
@@ -309,7 +313,8 @@ def save_model_params( fid, params ):
 	for var in params:
 		for grade in params[var]:
 			bounds = params[var][grade]
-			f.write(",".join([str(e) for e in [var]+[grade]+bounds])+"\n")
+			line = (",".join([str(e) for e in [var]+[grade]+bounds])+"\n")
+			f.write(line)
 	f.close()
 
 def load_model_params( fid ):
@@ -337,6 +342,12 @@ def load_model_params( fid ):
 	f.close()
 	return params
 
+def performance_model(params, x):
+	'''
+	TODO
+	'''
+	raise Exception('NOT IMPLEMENTED')
+
 def criticality_model( params, x ):
 	'''
 	params: model params
@@ -346,7 +357,7 @@ def criticality_model( params, x ):
 	es: Environmental Sensitivity
 	ac: Accessibility
 	'''
-	# For each input variable (rl, tb, ...) find membership given bounds
+	# For each input variable find membership given bounds
 	memberships = {var:membership(float(x[var]),params[var]) for var in x}
 
 	out = sum(memberships.values()) * 2./9
@@ -381,47 +392,94 @@ def get_condition_params():
 	return {
 			'model_name': 	'condition_model',
 			'model':		condition_model, 
-			'var_map': 		'var_maps/condition_var_map.json',
+			'var_map_fid': 		'var_maps/condition_var_map.json',
 			#'out_f':		condition_calc_out,
 			'out_f':		condition_exp_out,
-			'val_map':  	'val_maps/condition_exp_map.json',
-			'params':		'models/condition_model_opt.csv'
+			'val_map_fid':  	'val_maps/condition_exp_map.json',
+			'params_fid':		'models/condition_model_opt.csv'
 			}
 
 def get_criticality_params():
 	return {
 			'model_name': 	'criticality_model',
 			'model':		criticality_model, 
-			'var_map': 		'var_maps/criticality_var_map.json',
+			'var_map_fid': 		'var_maps/criticality_var_map.json',
 			'out_f':		criticality_exp_out,
-			'params':		'models/criticality_model.csv'
+			'params_fid':		'models/criticality_model_opt.csv'
+			}
+
+def get_performance_params():
+	return {
+			'model_name': 	'performance_model',
+			'model':		performance_model, 
+			'var_map_fid': 		'var_maps/performance_var_map.json',
+			'out_f':		performance_exp_out,
+			'params_fid':		'models/performance_model_opt.csv'
 			}
 
 
-if __name__ == "__main__":
-	data_fid = 'out/all_data.csv'
-	data = load_data( data_fid )
-	random.shuffle(data)
+def sample_data(p,data, n_bkts=10):
+	'''
+	sample data according to it's distribution 
+	into n_bkts buckets
+	'''
+	outs = [p['out_f'](p,row) for row in data]
+	max_val = max(outs)
+	min_val = min(outs)
+	ran = max_val - min_val
+	bucket_size = round(ran / float(n_bkts),3)
+	out_dist = {(bucket_size * i):0 for i in range(n_bkts+1)}
+	for val in outs:
+		val = int(val/bucket_size)*bucket_size
+		if val in out_dist:
+			out_dist[val] += 1
+	dist_counts = out_dist.values()	
+	dist_counts.sort()
 
-	#params = get_condition_params()
-	params = get_criticality_params()
+def run_model(data,params):
+	# adds a column coresponding to the output of the model to the data
 
 	p = params
-	params['data']=data
+	p['data']=data
 	
 	#update fid with data
-	if 'var_map' in p: p['var_map'] = json.load(open(params['var_map'], 'r'))
-	if 'val_map' in p: params['val_map'] = json.load(open(params['val_map'], 'r'))
-	params['params'] = load_model_params( params['params'] ) 
+	if 'var_map_fid' in p: p['var_map'] = json.load(open(p['var_map_fid'], 'r'))
+	if 'val_map_fid' in p: p['val_map'] = json.load(open(p['val_map_fid'], 'r'))
+	p['params'] = load_model_params( p['params_fid'] ) 
 
-	loss = model_loss(params)
-	print('loss: ' + str(loss))
+	#sample = sample_data(params,data)
 
+	loss = model_loss(p,None)
+	print(p['model_name']+' loss: ' + str(loss))
+	out_data = []
 	for row in data:
 		out = p['out_f'](p,row)
-		row[p['model_name']] = int(out*8)
-	save_data('out/all_data.csv',data)
+		row[p['model_name']] = int(out)
 
+if __name__ == "__main__":
+	data_fid = 'data/csv/all_data.csv'
+	data = load_data( data_fid )
 
+	cop = get_condition_params()
+	crp = get_criticality_params()
+	#pep = get_perfromance_params()
 
+	run_model(data,crp)
+	run_model(data,cop)
 
+	# choose only certain cols
+	cols = ['condition_model',
+			'PCSDesc',
+			'criticality_model',
+			'CRITICAL_SCR']
+
+	out_data = [{k:v for  k,v in row.items() if k in cols} for row in  data]
+	for row in out_data:
+		# normalize
+		row['PCSDesc']=cop['val_map'][row['PCSDesc']]/20.
+		try:
+			row['CRITICAL_SCR']=float(row['CRITICAL_SCR'])/1000.
+		except:
+			row['CRITICAL_SCR'] = 0
+	
+	save_data('out/model_out_data.csv',out_data,cols)

@@ -1,0 +1,12 @@
+Hours: 5
+
+ - Current Performance - 
+fuzzy logic
+condition_model loss: 0.14
+criticality_model loss: 0.22
+
+naive bayes	
+condition acc: 0.45
+critical acc: 0.82
+
+

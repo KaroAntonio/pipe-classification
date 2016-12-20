@@ -20,7 +20,8 @@ def params_to_vec( params ):
 		grades = list(params[var].keys())
 		grades.sort()
 		for grade in grades:
-			vec += [e for e in params[var][grade] if e not in [0, float('inf')]]
+			#vec += [e for e in params[var][grade] if e not in [0, float('inf')]]
+			vec += [e for e in params[var][grade]]
 
 	return np.array(vec)
 
@@ -41,7 +42,7 @@ def vec_to_params( vec, params ):
 			bounds = params[var][grade]
 			new_bounds = []
 			for b in bounds:
-				if b in [0,float('inf')]:
+				if False and b in [0,float('inf')]: # FALSED OUT # FALSED OUT
 					new_bounds += [b]
 				else: 
 					new_bounds += [vec[idx]]
@@ -157,6 +158,7 @@ def optimize_model(p, x0,n=1):
 	loss = get_loss_f(p)
 	for i in range(n):
 		print('loss: {}'.format(loss(x0)))
+		random.shuffle(p['data'])
 		res = minimize(loss, x0, method='BFGS', 
 			options={'disp': True})
 		x0 = res.x
@@ -178,10 +180,13 @@ def run_optimization(p):
 	rand_params_vec = rand_update_params(best_params_vec)
 	optimized = optimize_model(p, rand_params_vec, 2 )
 	loss0 = loss(optimized)
-
 	if loss0 < best_loss: best_params_vec = optimized
 
-	model_fid = 'models/condition_model_opt.csv'
+	model_fid = p['params_fid'] 
+	if '_opt' not in p['params_fid']:
+		print('REWRITE PARAM FID')
+		model_fid = model_fid.replace('.csv','_opt.csv')
+		print(model_fid)
 	save_model_params(model_fid, vec_to_params(best_params_vec, p['params']))
 	
 if __name__ == '__main__':
@@ -196,15 +201,14 @@ if __name__ == '__main__':
 	nominals['PCSDesc'] = json.load(open('val_maps/condition_exp_map.json', 'r'))
 	set_arff_nominal('data/arff/all_data.arff', nominals)
 
-	#p = get_condition_params()
-	p = get_criticality_params()
+	p = get_condition_params()
+	#p = get_criticality_params()
 
 	p['data']=data
 
 	#update fid with data
 	p['var_map'] = json.load(open(p['var_map'], 'r'))
-	#p['val_map'] = json.load(open(p['val_map'], 'r'))
-	p['params'] = load_model_params(p['params'] )
+	if 'val_map' in p: p['val_map'] = json.load(open(p['val_map'], 'r'))
+	p['params'] = load_model_params(p['params_fid'] )
 
 	run_optimization(p)
-

@@ -3,9 +3,9 @@
 	"(Catastrophic) - Flow Failure":1,
 	"(Catastrophic) - Not Balanced":2,
 	"(Severe)":3,
-	"(Moderate)":10,
-	"(Low)":13,
-	"(Negligible)":18,
-	"Inactive/Closed":19,
-	"Segment Removed":20
+	"(Moderate)":4,
+	"(Low)":5,
+	"(Negligible)":6,
+	"Inactive/Closed":7,
+	"Segment Removed":8
 }

@@ -18,30 +18,33 @@ accessibility: esa (easement col), calc, if there are any crossings, then easeme
 conformance: calc from chart
 water quality: chart
 
-
+----------------------------------------------------------------
 Condition Score
-RSL: remaining life
+RSL: remaining service life score
 MI: maintenance index
 * generate total number of breaks
 * generate recent number of breaks < total num breaks
-RSL: remaining service life score
+BRKS_FVYRS_SCR
 
 PCSDesc: Expert Opinion
 AR: Expert Opinion
 
-BRKS_FVYRS_SCR
 Score = SUM () * 8
 
+----------------------------------------------------------------
 Criticality Score
 CRITICAL_SCR: expert opinion
 (DIAMETER SCR+ ENVMT SCR+ ACCESS SCR)*6
 
+----------------------------------------------------------------
 Performance Score
 QUALITY_SCR
 STANDARD_CONFOR
-HEAD_LOSS_SCR: hydraulic capacit
+HEAD_LOSS_SCR: hydraulic capacity
 
-^^^ Those three summed and mult by 10
+^^^ Those three summed and mult by 10	
+----------------------------------------------------------------
+^^^ compare w other (weka/scipy) models
 
 SEVERITY: expert opinion
 
@@ -53,6 +56,18 @@ DIAMETER, LAND_USE,
 FINAL MODEL OUTPUT
 TOTAL PAN Score - High Score correlates to High Mitigation Class
 Mitigation - 1:Do Nothing, 2:Repair, 3:Replace, 4: Upsize
+
+Criticality Model : investigate the use of other models here
+
+FOR MODEL OUTPUT 
+scale model output to be in same range as the expert opinion
+have a column for calculated score for each model
+add normalized column for each of  the  above
+try implement model to predict
+
+TODO :: dec 16
+	convert NaiveBayes to 2.7
+	refactor functions into reasonable modules
 
 
 
