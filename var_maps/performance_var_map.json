@@ -2,5 +2,6 @@
 	"qs":"QUALIT_SCR",
 	"sc":"STANDARD_CONFOR",
 	"hls":"HEAD_LOSS_SCR",
-	"di":"DIAMETER"
+	"di":"DIAMETER",
+	"out":"Performanc_SCR"
 }

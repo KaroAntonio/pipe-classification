@@ -204,7 +204,7 @@ def test_performance_model(fid, params_fid, out_fid=None):
 		'''
 
 def performance_exp_out(p,row):
-	val = row['SEVERITY'].strip()
+	val = row[p['var_map']['out']].strip()
 	try:
 		return float(val)
 	except:
@@ -222,19 +222,20 @@ def condition_calc_out(row):
 		return sum(int(e) for e in out_cols)/60.
 
 def criticality_exp_out(p,row):
-	val = row['CRITICAL_SCR'].strip()
+	val = row[p['var_map']['out']].strip()
 	try:
 		ret = float(val)/1000
 	except:
 		if val == '`':
 			ret=0
 		else:
-			print(val)
+			#print(val)
+			pass
 
 	return ret
 
 def condition_exp_out(p,row):
-	k = row['PCSDesc'].strip()
+	k = row[p['var_map']['out']].strip()
 	return p['val_map'][k]/20.
 
 def model_loss(p,n=50):
@@ -296,7 +297,7 @@ def test_condition_model_old(fid, params_fid, out_fid=None):
 		print(str(diff) + ', actual: '+cl+', ''model: '+ cl_out)
 
 	diff_ratio = { k:diffs[k]/float(count) for k in diffs }	
-	print( diff_ratio )
+	#print( diff_ratio )
 	
 	# Save Predictions
 	if out_fid == None:
@@ -454,6 +455,7 @@ def run_model(data,params):
 	out_data = []
 	for row in data:
 		out = p['out_f'](p,row)
+		#print(out)
 		row[p['model_name']] = int(out)
 
 if __name__ == "__main__":
@@ -464,22 +466,28 @@ if __name__ == "__main__":
 	crp = get_criticality_params()
 	#pep = get_perfromance_params()
 
-	run_model(data,crp)
 	run_model(data,cop)
+	run_model(data,crp)
 
 	# choose only certain cols
 	cols = ['condition_model',
-			'PCSDesc',
+			crp['var_map']['out'],
+			cop['var_map']['out'],
 			'criticality_model',
-			'CRITICAL_SCR']
+			]
 
 	out_data = [{k:v for  k,v in row.items() if k in cols} for row in  data]
 	for row in out_data:
 		# normalize
-		row['PCSDesc']=cop['val_map'][row['PCSDesc']]/20.
+		'''
+		try:
+			row['PCSDesc']=cop['val_map'][row['PCSDesc']]/20.
+		except:
+			pass
 		try:
 			row['CRITICAL_SCR']=float(row['CRITICAL_SCR'])/1000.
 		except:
 			row['CRITICAL_SCR'] = 0
+		'''
 	
 	save_data('out/model_out_data.csv',out_data,cols)

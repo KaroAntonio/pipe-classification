@@ -1,6 +1,7 @@
 import NaiveBayes
 from fuzzylogic import *
 import json
+import sys
 
 def count_numbers(data,attr_name):
 	'''
@@ -103,7 +104,7 @@ def get_padding_instances(attr_values,label_values):
 	label_values = pad_values(label_values,max_len)
 	for attr,values in attr_values.items():
 		attr_values[attr] = pad_values(values,max_len)
-
+	
 	pad_insts = []
 	for i in range(len(label_values)):
 		inst = {'attributes':{a:attr_values[a][i] for a in attr_values},
@@ -119,6 +120,69 @@ def get_attr_values(data, attr_name):
 	try: return [float(row[attr_name]) for row in data]
 	except: return [row[attr_name] for row in data]
 
+def label_predictions(p,data):
+
+	#build_target_col(p,data)
+	data = bucketize_data_attrs(data)
+	attrs = p['var_map'].values()
+	
+	# split data into 10 train, predict batches
+	window = int(len(data) / 10.)
+	train_pred_batches = []
+	for i in range(10):
+		predict_data = data[i*window:(i+1)*window]
+		train_data = data[:i*window] + data[(i+1)*window:]
+
+		model = build_train_model(p,data,train_data)
+
+		for row in predict_data: 
+			attr_vals = {}
+			for name in attrs:
+				attr_vals[name] = row[name]
+
+			row['attributes'] = attr_vals
+			row['label'] = 'out='+str(row['model_target'])
+			row['cases'] = 1
+
+			pred = model.predict(row)
+
+			# Choose Top Label
+			pred_label = ''
+			max_conf = float('-inf') # confidence
+			for label in pred:
+				if pred[label] > max_conf:
+					max_conf = pred[label]
+					pred_label = label
+	
+			print(pred_label)
+			out = float(pred_label.split('=')[-1])
+			row[p['model_name']+'_pred'] = out
+
+def build_train_model(p, data, train_data):
+
+	attrs = p['var_map'].values()
+	train_insts = get_instances(train_data,attrs,'model_target')
+
+	model = NaiveBayes.NaiveBayes()	
+
+	# PAD MODEL Instances 
+	attr_values = {attr:list(set(get_attr_values(data,attr))) 
+					for attr in attrs}
+	label_values = list(set(get_attr_values(data,'model_target')))
+	pad_insts = get_padding_instances(attr_values, label_values)
+	# hacky way to assure all insts are seen at least once
+
+	for row in pad_insts:
+		model.add_instances(row)
+
+	# TRAIN Model
+	for row in train_insts:
+		model.add_instances(row)
+
+	model.train()
+
+	return model
+
 def naive_bayes_accuracy(p,data):
 
 	if 'var_map_fid' in p: 
@@ -127,7 +191,7 @@ def naive_bayes_accuracy(p,data):
 	if 'val_map_fid' in p:
 		p['val_map'] = json.load(open(p['val_map_fid'], 'r'))
 	p['params'] = load_model_params( p['params_fid'] )
-
+	
 	build_target_col(p,data)
 
 	data = bucketize_data_attrs(data)
@@ -136,7 +200,7 @@ def naive_bayes_accuracy(p,data):
 	random.shuffle(instances)
 
 	train_insts,test_insts = split_train_test(instances, train_ratio=0.9)
-
+	
 	# BUILD Model
 	model = NaiveBayes.NaiveBayes()	
 
@@ -147,6 +211,7 @@ def naive_bayes_accuracy(p,data):
 	pad_insts = get_padding_instances(attr_values, label_values)
 	# hacky way to assure all insts are seen at least once
 	print('NUM PAD:',len(pad_insts))
+
 	for row in pad_insts:
 		model.add_instances(row)
 
@@ -156,7 +221,7 @@ def naive_bayes_accuracy(p,data):
 
 	model.train()
 
-	# EVAL ACC	UCCURACY
+	# EVAL ACCUCCURACY
 	accs = []
 	target_confs = []
 	preds = {}
@@ -169,14 +234,29 @@ def naive_bayes_accuracy(p,data):
 		target_confs += [pred[row['label']]]
 
 	avg_confs = {attr: sum(confs)/len(confs) for attr,confs in preds.items()}
-	print(sum(target_confs)/len(target_confs))
+	print('Accuracy',sum(target_confs)/len(target_confs))
+
+def format_save_data(p,data):
+	cols = [
+            p['var_map']['out'],
+            p['model_name']+'_pred'
+            ]
+
+	out_data = [{k:v for  k,v in row.items() if k in cols} for row in  data]
+	save_data('out/nb_out_data.csv',out_data,cols)
 
 if __name__ == '__main__':
+	if sys.version_info[0] == 2:
+		print('YO USE PYTHON 3')
+
 	data_fid = 'data/csv/all_data.csv'
 	data = load_data( data_fid )
 
-	#p = get_condition_params()
+	p = get_condition_params()
 	#p = get_criticality_params()
-	p = get_performance_params()
+	#p = get_performance_params()
 
 	naive_bayes_accuracy(p,data)
+	label_predictions(p,data)
+	
+	format_save_data(p,data)

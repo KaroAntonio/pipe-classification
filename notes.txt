@@ -18,6 +18,8 @@ accessibility: esa (easement col), calc, if there are any crossings, then easeme
 conformance: calc from chart
 water quality: chart
 
+TODO: optimize Score mult (eg. x8)
+
 ----------------------------------------------------------------
 Condition Score
 RSL: remaining service life score
@@ -31,18 +33,25 @@ AR: Expert Opinion
 
 Score = SUM () * 8
 
+OUT: 2 cols
+score (num) / level (low/med/hi)
 ----------------------------------------------------------------
 Criticality Score
 CRITICAL_SCR: expert opinion
 (DIAMETER SCR+ ENVMT SCR+ ACCESS SCR)*6
 
+OUT: 2 cols
+score (num) / level (very-lo/mod-lo/med/mod-hi/hi)
 ----------------------------------------------------------------
 Performance Score
 QUALITY_SCR
 STANDARD_CONFOR
 HEAD_LOSS_SCR: hydraulic capacity
-
+DIAMETER: 
 ^^^ Those three summed and mult by 10	
+
+OUT: 2 cols
+score (num) / level (very-lo/mod-lo/med/mod-hi/hi)
 ----------------------------------------------------------------
 ^^^ compare w other (weka/scipy) models
 
