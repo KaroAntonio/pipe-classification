@@ -1,0 +1,7 @@
+{
+	"rl":"condition_model",
+	"tb":"TotBrks",
+	"rb":"BRKS_FVYRS",
+	"mi":"MI",
+	"out":"Condition_Score_Level"
+}

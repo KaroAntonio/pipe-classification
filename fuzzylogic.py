@@ -458,6 +458,18 @@ def run_model(data,params):
 		#print(out)
 		row[p['model_name']] = int(out)
 
+def build_data_frame(p):
+	data_frame = {}
+	for model_attr,table_attr in p['var_map'].items():
+		data_frame[table_attr] = []
+		for row in p['data']:
+			try:
+				data_frame[table_attr] += [float(row[table_attr])]
+			except:
+				pass
+
+	return data_frame
+
 if __name__ == "__main__":
 	data_fid = 'data/csv/all_data.csv'
 	data = load_data( data_fid )
@@ -468,6 +480,9 @@ if __name__ == "__main__":
 
 	run_model(data,cop)
 	run_model(data,crp)
+
+	cop_df = build_data_frame(cop)
+	crp_df = build_data_frame(crp)
 
 	# choose only certain cols
 	cols = ['condition_model',
@@ -491,3 +506,4 @@ if __name__ == "__main__":
 		'''
 	
 	save_data('out/model_out_data.csv',out_data,cols)
+	

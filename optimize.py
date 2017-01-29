@@ -207,8 +207,8 @@ if __name__ == '__main__':
 	p['data']=data
 
 	#update fid with data
-	p['var_map'] = json.load(open(p['var_map'], 'r'))
-	if 'val_map' in p: p['val_map'] = json.load(open(p['val_map'], 'r'))
+	p['var_map'] = json.load(open(p['var_map_fid'], 'r'))
+	if 'val_map_fid' in p: p['val_map'] = json.load(open(p['val_map_fid'], 'r'))
 	p['params'] = load_model_params(p['params_fid'] )
 
 	run_optimization(p)

@@ -154,7 +154,6 @@ def label_predictions(p,data):
 					max_conf = pred[label]
 					pred_label = label
 	
-			print(pred_label)
 			out = float(pred_label.split('=')[-1])
 			row[p['model_name']+'_pred'] = out
 
@@ -210,7 +209,7 @@ def naive_bayes_accuracy(p,data):
 	label_values = list(set(get_attr_values(data,'model_target')))
 	pad_insts = get_padding_instances(attr_values, label_values)
 	# hacky way to assure all insts are seen at least once
-	print('NUM PAD:',len(pad_insts))
+	print('MODEL:',p['model_name'],'NUM PAD:',len(pad_insts))
 
 	for row in pad_insts:
 		model.add_instances(row)
