@@ -1,15 +1,16 @@
-import numpy as np
+from pymatrix import *
 
 def gradientDescent(X, y, theta, alpha, iters):  
-    temp = np.matrix(np.zeros(theta.shape))
+    zeros = Matrix(shape=theta.shape) 
+    temp = Matrix(zeros)
     parameters = int(theta.ravel().shape[1])
-    cost = np.zeros(iters)
+    cost = Matrix(shape=(1,iters))
 
     for i in range(iters):
         error = (X * theta.T) - y
         for j in range(parameters):
-            term = np.multiply(error, X[:,j])
-            temp[0,j] = theta[0,j] - ((alpha / len(X)) * np.sum(term))
+            term = multiply(error, X[:,j])
+            temp[0][j] = theta[0,j] - ((alpha / len(X)) * sum(term))
 
         theta = temp
         cost[i] = computeCost(X, y, theta)
@@ -17,8 +18,8 @@ def gradientDescent(X, y, theta, alpha, iters):
     return theta, cost
 
 def computeCost(X, y, theta):  
-    inner = np.power(((X * theta.T) - y), 2)
-    return np.sum(inner) / (2 * len(X))
+    inner = power(((X * theta.T) - y), 2)
+    return sum(inner) / (2 * len(X))
 
 
 class LinearRegression:
@@ -33,7 +34,7 @@ class LinearRegression:
 
 	def normalize(self,X,y):
 		
-		data = np.concatenate([X.T,y]).T
+		data = concatenate([X.T,y]).T
 		mean = data.mean()
 		std = data.std()  
 		
@@ -42,9 +43,8 @@ class LinearRegression:
 
 		n_cols = data.shape[1]
 
-		a = np.ones(len(X))
-		a = np.matrix(a)
-		data = np.concatenate([a,data.T]).T
+		a = Matrix(shape=(1,len(X)),fill=1)
+		data = concatenate([a,data.T]).T
 
 		self.X = data[:,:n_cols]  
 		self.y = data[:,n_cols:]
@@ -55,7 +55,7 @@ class LinearRegression:
 		'''
 		make sure input is in proper form (matrix)
 		'''
-		return np.matrix(x)
+		return Matrix(x)
 
 	def fit(self, X,y):
 
@@ -65,7 +65,7 @@ class LinearRegression:
 		self.X,self.y,self.mean,self.std = self.normalize(X,y)
 
 		n_cols = self.X.shape[1]
-		self.theta = np.matrix(np.zeros(n_cols))
+		self.theta = Matrix(shape=(1,n_cols))
 		self.theta, self.cost = gradientDescent(self.X, 
 								self.y, 
 								self.theta, 
@@ -83,7 +83,7 @@ class LinearRegression:
 	def predict(self, X_test):
 		X_test = self.validate(X_test)
 
-		dummy_y = np.matrix(np.zeros(X_test.shape[0]))
+		dummy_y = Matrix(shape=(1,X_test.shape[0]))
 		X_test,y_test,_,_ = self.normalize(X_test,dummy_y)
 		return (X_test * self.theta.T * self.std) + self.mean
 
@@ -94,17 +94,16 @@ def test_lin_reg():
 		[2400,3,369000],
 		[1416,2,232000],
 		[3000,4,539900]]
-	data = np.matrix(data)  
+	data = Matrix(data)  
 
 	data = (data - data.mean()) / data.std()  
 
-	a = np.ones(5)
-	a = np.matrix([a])
-	data = np.concatenate([a,data.T]).T
+	a = Matrix(shape(1,5),fill=1)
+	data = concatenate([a,data.T]).T
 	X2 = data[:,:3]  
 	y2 = data[:,3:]  
 	print(X2,y2)
-	theta2 = np.matrix(np.array([0,0,0]))
+	theta2 = Matrix([[0,0,0]])
 	print(theta2)
 
 	# perform linear regression on the data set
@@ -122,9 +121,8 @@ if __name__ == '__main__':
 		[2400,3,369000],
 		[1416,2,232000],
 		[3000,4,539900]]
-	data = np.matrix(data)  
+	data = Matrix(data) 
 	X = data[:,:2]
-	print(X)
 	y = data[:,2:].T
 
 	model = LinearRegression()

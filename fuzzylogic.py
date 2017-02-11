@@ -204,7 +204,15 @@ def test_performance_model(fid, params_fid, out_fid=None):
 		'''
 
 def performance_exp_out(p,row):
-	val = row[p['var_map']['out']].strip()
+
+	out = row[p['var_map']['out']]
+	if (type(out) == str):
+		val = out.strip()
+	elif type(out) == int or type(out) == float:
+		val = out 
+	else:
+		raise Exception('WHAT ARE UUU')
+
 	try:
 		return float(val)
 	except:
@@ -222,20 +230,29 @@ def condition_calc_out(row):
 		return sum(int(e) for e in out_cols)/60.
 
 def criticality_exp_out(p,row):
-	val = row[p['var_map']['out']].strip()
+	
+	out = row[p['var_map']['out']]
+	if (type(out) == str):
+		val = out.strip()
+	elif type(out) == int or type(out) == float:
+		val = out 
+	else:
+		raise Exception('WHAT ARE UUU')
 	try:
-		ret = float(val)/1000
+		ret = float(val)
 	except:
 		if val == '`':
 			ret=0
 		else:
 			#print(val)
-			pass
+			ret = 0
 
 	return ret
 
 def condition_exp_out(p,row):
 	k = row[p['var_map']['out']].strip()
+	if k.isdigit():
+		return int(k)
 	return p['val_map'][k]/20.
 
 def model_loss(p,n=50):
@@ -505,5 +522,5 @@ if __name__ == "__main__":
 			row['CRITICAL_SCR'] = 0
 		'''
 	
-	save_data('out/model_out_data.csv',out_data,cols)
+	save_data('out/fuzzy_out_data.csv',out_data,cols)
 	

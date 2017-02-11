@@ -1,6 +1,9 @@
 import sys
 from fuzzylogic import * 
 import numpy as np
+#from sklearn.svm import SVR
+#from sklearn.linear_model import LogisticRegression
+#from sklearn import model_selection
 from LinearRegression import LinearRegression
 import random
 
@@ -76,9 +79,8 @@ def get_pred(p,data):
 
 	return trained_model.predict(X)
 
-def add_data_regression_preds(params,data):
+def add_data_preds(params,data):
 	'''
-	adds the pred for each row to the data
 	params: a  list of params
 	'''
 	preds = []
@@ -98,6 +100,5 @@ if __name__ == '__main__':
 		get_performance_params()
 		]
 
-	add_data_regression_preds(params,data)
+	add_data_preds(params,data)
 	format_save(params,'out/reg_out_data.csv')
-
