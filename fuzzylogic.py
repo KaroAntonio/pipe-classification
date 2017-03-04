@@ -502,7 +502,8 @@ if __name__ == "__main__":
 	crp_df = build_data_frame(crp)
 
 	# choose only certain cols
-	cols = ['condition_model',
+	cols = ['FID',
+			'condition_model',
 			crp['var_map']['out'],
 			cop['var_map']['out'],
 			'criticality_model',

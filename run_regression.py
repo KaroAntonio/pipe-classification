@@ -1,7 +1,7 @@
 import sys
 from fuzzylogic import * 
 import numpy as np
-from LinearRegression import LinearRegression
+from MatLinearRegression import LinearRegression
 import random
 
 
@@ -34,7 +34,7 @@ def build_xy(p,n=None):
 def format_save(params, fid):
 
 	data = params[0]['data']
-	cols = []
+	cols = ['FID']
 	for p in params:
 		cols += [
 				p['var_map']['out'],

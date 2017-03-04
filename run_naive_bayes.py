@@ -2,6 +2,7 @@ import NaiveBayes
 from fuzzylogic import *
 import json
 import sys
+import copy
 
 def count_numbers(data,attr_name):
 	'''
@@ -256,13 +257,19 @@ if __name__ == '__main__':
 			get_criticality_params(),
 			get_performance_params()]
 
-	cols = []
-	for p in params:
+
+	# we save the ids because they'll get mangled by the bayesian model... 
+	row_fids = [row['FID'] for row in data] 
+	cols = ['FID']
+	for p in params[:1]:
 		naive_bayes_accuracy(p,data)
 		label_predictions(p,data)
 		cols += [
 				p['var_map']['out'],
 				p['model_name']+'_nb_pred'
 				]
+
+	for row,row_fid in zip(data,row_fids):
+		row['FID'] = row_fid
 
 	format_save_data(p,data,cols)
