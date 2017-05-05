@@ -1,6 +1,7 @@
 from random import random as rand
 import random
 import csv,json
+#from params import *
 
 def load_data( fid ):
 	with open( fid, 'r' ) as csvfile:
@@ -250,9 +251,13 @@ def criticality_exp_out(p,row):
 	return ret
 
 def condition_exp_out(p,row):
-	k = row[p['var_map']['out']].strip()
-	if k.isdigit():
-		return int(k)
+	k = row[p['var_map']['out']]
+	if type(k) == str: 
+		k.strip()
+		if k.isdigit():
+			return int(k)
+	if type(k) == float:
+		return k
 	return p['val_map'][k]/20.
 
 def model_loss(p,n=50):
@@ -406,6 +411,9 @@ def gen_brks_cols():
 	gen_col(data,'BRKS_FVYRS_SCR','row["TotBrks"]')
 	save_data('data/csv/all_data_2.csv',data)
 
+def mitigation_model( params, x ):
+	return 1
+
 def get_condition_params():
 	return {
 			'model_name': 	'condition_model',
@@ -435,6 +443,12 @@ def get_performance_params():
 			'params_fid':		'models/performance_model_opt.csv'
 			}
 
+def get_mitigation_params():
+    return {
+			'out_f':		condition_exp_out,
+            'model_name':   'mitigation_model',
+            'var_map_fid':      'var_maps/mitigation_var_map.json',
+            }
 
 def sample_data(p,data, n_bkts=10):
 	'''
@@ -492,6 +506,7 @@ if __name__ == "__main__":
 	data = load_data( data_fid )
 
 	cop = get_condition_params()
+	cop['model'] = condition_model
 	crp = get_criticality_params()
 	#pep = get_perfromance_params()
 

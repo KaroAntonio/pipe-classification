@@ -1,5 +1,6 @@
 import NaiveBayes
 from fuzzylogic import *
+#from params import *
 import json
 import sys
 import copy
@@ -186,11 +187,13 @@ def build_train_model(p, data, train_data):
 def naive_bayes_accuracy(p,data):
 
 	if 'var_map_fid' in p: 
+		print(p['var_map_fid'])
 		p['var_map'] = json.load(open(p['var_map_fid'], 'r'))
 
 	if 'val_map_fid' in p:
 		p['val_map'] = json.load(open(p['val_map_fid'], 'r'))
-	p['params'] = load_model_params( p['params_fid'] )
+	if 'params' in p:
+		p['params'] = load_model_params( p['params_fid'] )
 	
 	build_target_col(p,data)
 
@@ -210,7 +213,7 @@ def naive_bayes_accuracy(p,data):
 	label_values = list(set(get_attr_values(data,'model_target')))
 	pad_insts = get_padding_instances(attr_values, label_values)
 	# hacky way to assure all insts are seen at least once
-	print('MODEL:',p['model_name'],'NUM PAD:',len(pad_insts))
+	print('MODEL: {} NUM PAD: {}'.format(p['model_name'],len(pad_insts)))
 
 	for row in pad_insts:
 		model.add_instances(row)
@@ -234,7 +237,7 @@ def naive_bayes_accuracy(p,data):
 		target_confs += [pred[row['label']]]
 
 	avg_confs = {attr: sum(confs)/len(confs) for attr,confs in preds.items()}
-	print('Accuracy',sum(target_confs)/len(target_confs))
+	print('Accuracy {}'.format(sum(target_confs)/len(target_confs)))
 
 def format_save_data(p,data, cols=None):
 	if not cols:
@@ -247,21 +250,19 @@ def format_save_data(p,data, cols=None):
 	save_data('out/nb_out_data.csv',out_data,cols)
 
 if __name__ == '__main__':
-	if sys.version_info[0] == 2:
-		print('YO USE PYTHON 3')
 
 	data_fid = 'data/csv/all_data.csv'
 	data = load_data( data_fid )
 
 	params = [get_condition_params(),
-			get_criticality_params(),
-			get_performance_params()]
-
+			#get_criticality_params(),
+			#get_performance_params(), 
+			get_mitigation_params()]
 
 	# we save the ids because they'll get mangled by the bayesian model... 
 	row_fids = [row['FID'] for row in data] 
 	cols = ['FID']
-	for p in params[:1]:
+	for p in params:
 		naive_bayes_accuracy(p,data)
 		label_predictions(p,data)
 		cols += [

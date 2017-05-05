@@ -1,9 +1,7 @@
 import sys
 from fuzzylogic import * 
-import numpy as np
 from MatLinearRegression import LinearRegression
 import random
-
 
 def vectorize_data(p):
 	'''	
@@ -11,7 +9,6 @@ def vectorize_data(p):
 	'''
 	pass
 	
-
 def build_xy(p,n=None):
 	'''
 	p: params
@@ -19,6 +16,9 @@ def build_xy(p,n=None):
 	return x and y for training in np format
 	'''
 	df = p['df']
+	for k in df:
+		random.shuffle(df[k])
+
 	x = []
 	y = []
 	if not n: n = float('inf')
@@ -58,14 +58,15 @@ def get_pred(p,data):
 	for k in df:
 		print('{} max: {}, min: {}'.format(k,max(df[k]),min(df[k])))
 	
-	X,y = build_xy(p)
+	X,y = build_xy(p, 10)
 	print('X y built: {} samples'.format(len(X)))
 	train_ratio = 0.9 # ratio of samples used for training
 	n_train = int(len(X) * train_ratio)
 	X_train, X_test = X[:n_train], X[n_train:]
 	y_train, y_test = y[:n_train], y[n_train:]
 
-	#model = SVR(kernel='linear', C=1e3)
+	y_train, y_test = [y_train], [y_test]
+
 	model = LinearRegression() 
 
 	print('Training...')
@@ -93,9 +94,10 @@ if __name__ == '__main__':
 	random.shuffle(data)
 	
 	params = [
-		get_condition_params(),
-		get_criticality_params(),
-		get_performance_params()
+		#get_condition_params(),
+		#get_criticality_params(),
+		#get_performance_params()
+		get_mitigation_params()
 		]
 
 	add_data_regression_preds(params,data)

@@ -121,12 +121,17 @@ if __name__ == '__main__':
 		[2400,3,369000],
 		[1416,2,232000],
 		[3000,4,539900]]
+	for i in range(8):
+		data += data
+
+	print(len(data))
 	data = Matrix(data) 
 	X = data[:,:2]
 	y = data[:,2:].T
-
+	
+	print('Train')
 	model = LinearRegression()
 	model.fit(X,y)
 	print(model.score(X,y))
-	print(model.predict(X))
+	#print(model.predict(X))
 

@@ -1,7 +1,14 @@
 {
-	"rl":"condition_model",
+	"rl":"RSL",
 	"tb":"TotBrks",
 	"rb":"BRKS_FVYRS",
 	"mi":"MI",
-	"out":"Condition_Score_Level"
+	"qs":"QUALIT_SCR",
+    "sc":"STANDARD_CONFOR",
+    "hls":"HEAD_LOSS_SCR",
+    "di":"DIAMETER",
+	"pd": "DIAMETER",
+    "es": "ENVMT_SCR",
+    "ac": "ACCESS_SCR",
+	"out":"MITIGATION_Level"
 }

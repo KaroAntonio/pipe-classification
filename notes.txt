@@ -89,3 +89,32 @@ TODO :: feb 14, 2017
 
 	add global run function that you can call from ARC GIS
 
+----------------------------------------------------------------
+
+TODO :: march 4, 2017
+	1. generate mitigation column based on rules	
+	2. generate mitigation output with naivebayes
+	3. look into bernoulli, gaussian for naive bayes
+
+MITIGATION MATRIX
+	for Mitigation		For Condition, Criticality and Performance
+	1= Do Nothing		1= Very Low
+	2= Upsize			2= Moderately Low
+	3=Rehab				3= Medium
+	4=Replace			4= Moderately High
+	5= Very High
+ 
+----------------------------------------------------------------
+
+TODO :: march 18, 2017
+
+TASKS:
+	1. Performance Target, Criticitality Target, Condition Target
+	2. Make fake target for the second layer
+	3. bernoulli/gaussian naive bayes
+	4. Integrate mitigation layer
+	
+
+HOURS:
+	1. One Hour Outstanding. 
+	
