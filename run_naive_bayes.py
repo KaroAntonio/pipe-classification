@@ -122,6 +122,22 @@ def get_attr_values(data, attr_name):
 	try: return [float(row[attr_name]) for row in data]
 	except: return [row[attr_name] for row in data]
 
+
+def attribute_weights(model, n=1000):
+	''' 
+	model: an nb model
+	n: number of experiments
+	performs some statistical analysis to determine weight relevance
+	returns a dictionary of the weight of each attribute in determining class
+	'''
+	for i in range(n): 
+		# generate a random datapoint with valid attrs
+		dp = {}
+		#dp['attributes'] = {k:random.choice(model.attvals[]) for k in model.attvals}
+		dp['cases'] = 1
+
+
+
 def label_predictions(p,data):
 
 	#build_target_col(p,data)
@@ -130,7 +146,6 @@ def label_predictions(p,data):
 	
 	# split data into 10 train, predict batches
 	window = int(len(data) / 10.)
-	train_pred_batches = []
 	for i in range(10):
 		predict_data = data[i*window:(i+1)*window]
 		train_data = data[:i*window] + data[(i+1)*window:]
@@ -158,6 +173,9 @@ def label_predictions(p,data):
 			
 			out = float(pred_label.split('=')[-1])
 			row[p['model_name']+'_pred'] = out
+	
+	# returns the last model (of 10)
+	return model
 
 def build_train_model(p, data, train_data):
 
@@ -238,6 +256,7 @@ def naive_bayes_accuracy(p,data):
 
 	avg_confs = {attr: sum(confs)/len(confs) for attr,confs in preds.items()}
 	print('Accuracy {}'.format(sum(target_confs)/len(target_confs)))
+	
 
 def format_save_data(p,data, cols=None):
 	if not cols:
@@ -249,22 +268,108 @@ def format_save_data(p,data, cols=None):
 	out_data = [{k:v for  k,v in row.items() if k in cols} for row in  data]
 	save_data('out/nb_out_data.csv',out_data,cols)
 
+def predicted_label(pred):
+	# Choose Top Label
+	pred_label = ''
+	max_conf = float('-inf') # confidence
+	for label in pred:
+		if pred[label] > max_conf:
+			max_conf = pred[label]
+			pred_label = label
+	return pred_label
+
+def apply_matrix(mat_data,row,input_map):
+	# apply matrix
+	for mat_row in mat_data:
+		is_match = True
+		# check if all cols match
+		for mat_k,data_k in input_map.items():
+			if row[data_k] != mat_row[mat_k]:
+				is_match = False
+		if is_match:
+			row[mat_k] = mat_row['Mitigation']
+			return row[mat_k]
+
+def evaluate_matrix(data):
+ 	
+	# map of pred keys to matrix keys (should maybs be moved to a file)
+	input_map = {
+		'Condition':'cond',
+		'performance':'perf',
+		'Criticality':'crit'
+	}
+
+	mat_fid = 'data/csv/mitigation_matrix.csv'
+	mat_data = load_data( mat_fid )
+
+	params = {'cond':get_condition_params(),
+		'crit':get_criticality_params(),
+		'perf':get_performance_params()}
+	
+	# load_var_maps, build target
+	for name, p in params.items():
+		if 'var_map_fid' in p: 
+			p['var_map'] = json.load(open(p['var_map_fid'], 'r'))
+		build_target_col(p,data)
+
+	data = bucketize_data_attrs(data)
+	
+	# split data into 10 train, predict batches
+	window = int(len(data) / 10.)
+	for i in range(10):
+		predict_data = data[i*window:(i+1)*window]
+		train_data = data[:i*window] + data[(i+1)*window:]
+
+
+		# train models
+		models = {} 
+		for name,p in params.items():
+			models[name] = build_train_model(p,data, train_data)
+
+		
+		# for each data point (row)
+		for row in predict_data: 
+			# for each model, 
+			top_preds = {}
+			for name in models:
+				m = models[name]
+				attrs = params[name]['var_map'].values()
+				attr_vals = { 
+						name:row[name] for name in attrs  if name != 'out'
+						}
+			
+				row['attributes'] = attr_vals 
+				row['label'] = 'out='+str(row['model_target'])
+				row['cases'] = 1
+
+				pred = m.predict(row) 
+				top_preds[name] = float(predicted_label(pred).split('=')[-1])
+				# mold to formt that matrix is ~ a str int
+				top_preds[name] = str(int(top_preds[name]))
+			mat_pred = apply_matrix(mat_data,top_preds, input_map)
+
+			row['matrix_pred'] = mat_pred
+	
 if __name__ == '__main__':
 
 	data_fid = 'data/csv/all_data.csv'
 	data = load_data( data_fid )
 
 	params = [get_condition_params(),
-			#get_criticality_params(),
-			#get_performance_params(), 
+			get_criticality_params(),
+			get_performance_params(), 
 			get_mitigation_params()]
 
 	# we save the ids because they'll get mangled by the bayesian model... 
 	row_fids = [row['FID'] for row in data] 
 	cols = ['FID']
+
+	_ = evaluate_matrix(data)
+	cols = ['matrix_predction']
+
 	for p in params:
 		naive_bayes_accuracy(p,data)
-		label_predictions(p,data)
+		model = label_predictions(p,data)
 		cols += [
 				p['var_map']['out'],
 				p['model_name']+'_nb_pred'

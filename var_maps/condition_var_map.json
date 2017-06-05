@@ -3,5 +3,5 @@
 	"tb":"TotBrks",
 	"rb":"BRKS_FVYRS",
 	"mi":"MI",
-	"out":"Condition_Score"
+	"out":"TARGET_Condition_level"
 }

@@ -117,4 +117,27 @@ TASKS:
 
 HOURS:
 	1. One Hour Outstanding. 
-	
+
+----------------------------------------------------------------
+
+TODO :: may 16, 2017
+
+Get weights two layer naive bayes
+Get weights one layer naive bayes
+train on expert opinion and final output
+
+train first layer using final output as the target
+train second layer using final output as target
+		outputs of first layer
+		
+
+What does the weights mean? 	
+
+
+----------------------------------------------------------------
+
+DEV :: June 5, 2017
+
+for the cond, crit, perf models i used TARGET cols, is this what i want?
+
+hours: 4 more

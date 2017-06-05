@@ -8,10 +8,7 @@ mat_data = load_data( mat_fid )
 # get headers in correct order
 f = open(data_fid) 
 headers = list(set([ e.strip('\n') for e in f.readline().split(',')]))
-#headers = [ e.strip() for e in f.readline().split(',')]
 csv_headers = list(data[0]) 
-#csv_headers = [e.strip() for e in csv_headers]
-#headers = [ e for e in headers if e.strip()]
 diff1 = [ e for e in headers if e not in csv_headers]
 diff2 = [ e for e in csv_headers if e not in headers]
 

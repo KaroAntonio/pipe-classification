@@ -6,9 +6,8 @@
 	"qs":"QUALIT_SCR",
     "sc":"STANDARD_CONFOR",
     "hls":"HEAD_LOSS_SCR",
-    "di":"DIAMETER",
 	"pd": "DIAMETER",
     "es": "ENVMT_SCR",
     "ac": "ACCESS_SCR",
-	"out":"MITIGATION_Level"
+	"out":"MITIGATION_Level_PAN"
 }
