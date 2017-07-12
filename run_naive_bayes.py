@@ -258,7 +258,7 @@ def naive_bayes_accuracy(p,data):
 	print('Accuracy {}'.format(sum(target_confs)/len(target_confs)))
 	
 
-def format_save_data(p,data, cols=None):
+def format_save_data(p,data, cols=None, out_fid='out/nb_out_data.csv'):
 	if not cols:
 		cols = [
 				p['var_map']['out'],
@@ -266,7 +266,7 @@ def format_save_data(p,data, cols=None):
 				]
 
 	out_data = [{k:v for  k,v in row.items() if k in cols} for row in  data]
-	save_data('out/nb_out_data.csv',out_data,cols)
+	save_data(out_fid,out_data,cols)
 
 def predicted_label(pred):
 	# Choose Top Label
