@@ -1,0 +1,11 @@
+{
+	"rl":"RSL",
+	"tb":"TotBrks",
+	"rb":"BRKS_FVYRS",
+	"mi":"MI",
+    "sc":"STANDARD_CONFOR",
+	"pd": "DIAMETER",
+    "es": "ENVMT_SCR",
+    "ac": "ACCESS_SCR",
+	"out":"MITIGATION_Level_PAN"
+}

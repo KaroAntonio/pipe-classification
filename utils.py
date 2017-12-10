@@ -148,6 +148,17 @@ def get_attr_val_counts(data, attr):
 		attr_val_counts[val] += 1 
 	return attr_val_counts
 
+def load_prep_data( data_fid ):
+	'''
+	load, clean, bucketize data
+	'''
+	
+	data = load_data( data_fid )
+
+        c_data = clean_data( data )
+        b_data = bucketize_data( c_data )
+	return b_data
+
 if __name__ == '__main__':
 
 	TRAINING_FID = 'data/csv/all_data.csv'
