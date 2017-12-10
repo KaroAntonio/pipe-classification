@@ -141,3 +141,11 @@ DEV :: June 5, 2017
 for the cond, crit, perf models i used TARGET cols, is this what i want?
 
 hours: 4 more
+
+
+----------------------------------------------------------------
+
+DEV :: Dec 10, 2017
+
+hours 2 more (at 11:40)
+

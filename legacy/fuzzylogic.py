@@ -247,7 +247,6 @@ def criticality_exp_out(p,row):
 		else:
 			#print(val)
 			ret = 0
-
 	return ret
 
 def condition_exp_out(p,row):

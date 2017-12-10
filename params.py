@@ -1,3 +1,5 @@
+from utils import *
+
 def get_condition_params():
     return {
             'model_name':   'condition_model',
@@ -29,6 +31,13 @@ def get_performance_params():
 
 def get_mitigation_params():
     return {
-            'model_name':   'mitigation_model',
-            'var_map_fid':      'var_maps/mitigation_var_map.json',
+		'model_name':   'mitigation_model',
+		'var_map_fid':   'var_maps/mitigation_var_map.json',
             }
+
+def prep_params( p ):
+	if 'var_map_fid' in p and 'var_map' not in p:
+		p['var_map'] = json.load(open(p['var_map_fid'], 'r'))	
+
+	p['out'] = p['var_map']['out']
+	return p

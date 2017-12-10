@@ -2,7 +2,7 @@
 script to merge the out files according to FID
 '''
 
-from fuzzylogic import *
+from utils import *
 
 script_map = {
 		'nb_out_data.csv':'naive_bayes',
