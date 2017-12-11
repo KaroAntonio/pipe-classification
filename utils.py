@@ -148,6 +148,18 @@ def get_attr_val_counts(data, attr):
 		attr_val_counts[val] += 1 
 	return attr_val_counts
 
+def prompt_for_valid_filename(prompt):
+		
+	while(1):
+		fid = raw_input(prompt).strip()
+		try:
+			f = open(fid)
+			f.close()
+			return fid
+		except:
+			print('{} is not a file.'.format(fid))
+		
+
 def load_prep_data( data_fid ):
 	'''
 	load, clean, bucketize data
