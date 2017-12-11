@@ -88,11 +88,11 @@ def save_var_map(var_map, var_map_name):
 	with open('var_maps/'+var_map_name,'w') as f:
 		json.dump(var_map, f)
 
-def determine_save_best_vars(p, data):
+def determine_save_best_vars(p, data, out_fid):
 	acc, best_vars = determine_best_vars(p, data)	
 	best_var_map = {i:v for i,v in enumerate(best_vars)}
 	best_var_map['out'] = p['var_map']['out']
-	save_var_map(best_var_map,'best_nb.json')
+	save_var_map(best_var_map,out_fid)
 	
 if __name__ == '__main__':
         DATA_FID = 'data/csv/all_data.csv'
