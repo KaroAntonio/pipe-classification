@@ -213,7 +213,6 @@ def prep_data_run_naive_bayes( train_fid, out_fid, var_map_fid, save=True ):
 
 	# These are the methods to prep and run naive bayes
 	data = load_data( train_fid )
-	print('dataset size: '+str(len(data)))
 	random.shuffle(data)
 
 	# save FIDs after shuffling so that the order is preserved
@@ -231,7 +230,9 @@ def prep_data_run_naive_bayes( train_fid, out_fid, var_map_fid, save=True ):
 
 	acc = label_predictions(p,data)
 
-	print('{} acc: {} '.format(p['model_name'],acc))
+	# print('{} acc: {} '.format(p['model_name'],acc))
+	print('var map: {}'.format(var_map_fid))
+	print('acc: {} '.format(acc))
 
 	cols = ['FID']
 	cols += [
@@ -242,11 +243,13 @@ def prep_data_run_naive_bayes( train_fid, out_fid, var_map_fid, save=True ):
 	# restore FIDs
 	for row,row_fid in zip(data,row_fids):
 		row['FID'] = row_fid
-
+	
+	'''
 	print('Output Distribution:')
 	print(get_attr_val_counts(data, p['out']))
 	print('Prediction Distribution:')
 	print(get_attr_val_counts(data, 'mitigation_model_pred'))
+	'''
 
 	if save: format_save_data(p,data,cols,out_fid=out_fid)
 
