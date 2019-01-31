@@ -40,6 +40,8 @@ for model_name in MODEL_NAMES:
     res_out_fid = OUT_FID.format(model_name)
     res[model_name] = prep_data_run_naive_bayes( TRAINING_FID, res_out_fid, var_map_fid )
 
+
+print('Saving All Model Output: {}'.format('out/naive_bayes_all_models.csv'))
 fid_map = output_joint_models( res )
 fieldnames = ['FID','PERFORMANCE_Level_PAN','performance_model_pred','CRITICALITY_Level_PAN','criticality_model_pred','condition_model_pred','CONDITION_Level_PAN','MITIGATION_Level_PAN','mitigation_model_pred']
 save_data('out/naive_bayes_all_models.csv',fid_map.values(), fieldnames)
