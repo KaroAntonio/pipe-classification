@@ -244,12 +244,10 @@ def prep_data_run_naive_bayes( train_fid, out_fid, var_map_fid, save=True ):
 	for row,row_fid in zip(data,row_fids):
 		row['FID'] = row_fid
 	
-	'''
 	print('Output Distribution:')
 	print(get_attr_val_counts(data, p['out']))
 	print('Prediction Distribution:')
 	print(get_attr_val_counts(data, 'mitigation_model_pred'))
-	'''
 
 	if save: format_save_data(p,data,cols,out_fid=out_fid)
 

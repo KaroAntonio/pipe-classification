@@ -3,5 +3,5 @@
 	"sc":"STANDARD_CONFOR",
 	"hls":"HEAD_LOSS_SCR",
 	"di":"DIAMETER",
-	"out":"MITIGATION_Level_PAN"
+	"out":"TARGET_Performance_Level"
 }

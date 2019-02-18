@@ -40,3 +40,11 @@ The Fuzzy Logic for the bounds is implemented such that given an input, the mode
 
 **Training**  
 The model paramaters are optimized using scipy's minimize function. The optimization method found to be the most effective given these parameters is [Broyden–Fletcher–Goldfarb–Shanno](https://en.wikipedia.org/wiki/Broyden–Fletcher–Goldfarb–Shanno_algorithm) algorithm (BFGS). In order to perform parameter updates, the first and second derivatives are estimated after several iterations of training. Broadly, BFGS trains by iteratively updating the parameters based on how much a change to each parameter will impact the output of the model. Training uses the difference between the (floating point) score achieved by the model and the expected score as the loss function. Training Improves the accuracy of the bounds model (as compared to a rule-based if/else model) from an accuracy of 0.49 to 0.88.
+
+### Targets Used
+TARGET_Mitigation_level_PAN
+TARGET_Performance_Level
+TARGET_Condition_Level
+TARGET_Condition_Level
+
+

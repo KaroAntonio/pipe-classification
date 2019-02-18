@@ -9,5 +9,5 @@
 	"pd": "DIAMETER",
     "es": "ENVMT_SCR",
     "ac": "ACCESS_SCR",
-	"out":"MITIGATION_Level_PAN"
+	"out":"TARGET_MITIGATION_Level_PAN"
 }

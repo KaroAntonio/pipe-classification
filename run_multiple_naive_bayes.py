@@ -14,7 +14,7 @@ MODEL_NAMES = [
 	'performance',
 	'criticality',
 	'condition',
-	'mitigation',
+	'mitigation'
 	]
 
 def output_joint_models( res ):
