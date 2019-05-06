@@ -118,7 +118,7 @@ def label_predictions(p,data):
 			out = float(pred_label.split('=')[-1])
 			row[p['model_name']+'_pred'] = out
 			n_correct_preds += 1 if out == row[p['out']] else 0
-	
+	p['nb_model'] = model
 	# returns accuracy 
 	return n_correct_preds / float(len(data) )
 
@@ -209,48 +209,50 @@ def predicted_label(pred):
 			pred_label = label
 	return pred_label
 
-def prep_data_run_naive_bayes( train_fid, out_fid, var_map_fid, save=True ):
+def prep_data_run_naive_bayes( train_data, out_fid, model_name, save=True ):
 
-	# These are the methods to prep and run naive bayes
-	data = load_data( train_fid )
-	random.shuffle(data)
+  # These are the methods to prep and run naive bayes
+  #data = load_data( train_fid )
+  data = train_data
+  random.shuffle(data)
 
-	# save FIDs after shuffling so that the order is preserved
-	row_fids = [row['FID'] for row in data]
+  # save FIDs after shuffling so that the order is preserved
+  row_fids = [row['FID'] for row in data]
 
-	c_data = clean_data( data )
-	b_data = bucketize_data( c_data )
-	data = b_data
+  c_data = clean_data( data )
+  b_data = bucketize_data( c_data )
+  data = b_data
 
-	p = get_mitigation_params()
-	p['var_map_fid'] = var_map_fid
-	p = prep_params( p )
-	
-	p['data'] = data
+  p = {'model_name':model_name}
+  var_map_fid = 'var_maps/{}_var_map.json'.format(model_name)
+  p['var_map_fid'] = var_map_fid
+  p = prep_params( p )
 
-	acc = label_predictions(p,data)
+  p['data'] = data
 
-	# print('{} acc: {} '.format(p['model_name'],acc))
-	print('var map: {}'.format(var_map_fid))
-	print('acc: {} '.format(acc))
+  acc = label_predictions(p,data)
 
-	cols = ['FID']
-	cols += [
-		p['var_map']['out'],
-		p['model_name']+'_pred'
-		]
+  print('var map: {}'.format(var_map_fid))
+  print('{} acc: {} '.format(p['model_name'],acc))
+  #print('acc: {} '.format(acc))
 
-	# restore FIDs
-	for row,row_fid in zip(data,row_fids):
-		row['FID'] = row_fid
-	
-	print('Output Distribution:')
-	print(get_attr_val_counts(data, p['out']))
-	print('Prediction Distribution:')
-	print(get_attr_val_counts(data, 'mitigation_model_pred'))
+  cols = ['FID']
+  cols += [
+    p['var_map']['out'],
+    p['model_name']+'_pred'
+  ]
 
-	if save: format_save_data(p,data,cols,out_fid=out_fid)
+  # restore FIDs
+  for row,row_fid in zip(data,row_fids):
+    row['FID'] = row_fid
 
-	return p
+  print('Output Distribution:')
+  print(get_attr_val_counts(data, p['out']))
+  print('Prediction Distribution:')
+  print(get_attr_val_counts(data, '{}_pred'.format(model_name)))
+
+  if save: format_save_data(p,data,cols,out_fid=out_fid)
+
+  return p
 
 
