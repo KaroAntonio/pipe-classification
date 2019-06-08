@@ -1,14 +1,12 @@
 import random
 
-from utils import *
-from params import * 
-
-import ml_models.NaiveBayes
-from naive_bayes_utils import *
-from assess_naive_bayes import *
+from core.utils import *
+from core.params import * 
+from core.naive_bayes_utils import *
+from core.assess_naive_bayes import *
 
 DATA_FID = 'data/csv/all_data.csv'
-VAR_MAP_FID = 'var_maps/mitigation_var_map.json'
+VAR_MAP_FID = 'data/var_maps/mitigation_var_map.json'
 OUT_FID = 'best_nb.json'
 
 data = load_prep_data( DATA_FID )

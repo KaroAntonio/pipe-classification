@@ -1,10 +1,10 @@
 import random
 
-from utils import *
-from params import * 
+from core.utils import *
+from core.params import * 
 
-import ml_models.NaiveBayes
-from naive_bayes_utils import *
+import models.NaiveBayes
+from core.naive_bayes_utils import *
 
 # a script to consolidate training and prediction of naive bayes
 
@@ -23,7 +23,7 @@ def output_joint_models( res ):
   fid_map = {}
   for model_name in MODEL_NAMES:
     params = {'model_name':model_name}
-    var_map_fid = 'var_maps/{}_var_map.json'.format(model_name)
+    var_map_fid = 'data/var_maps/{}_var_map.json'.format(model_name)
     params['var_map_fid'] = var_map_fid
     params = prep_params( params )
 
@@ -44,7 +44,7 @@ def output_joint_models( res ):
 res = {}
 train_data = load_data( TRAINING_FID )
 for model_name in MODEL_NAMES:
-  var_map_fid = 'var_maps/{}_var_map.json'.format(model_name)
+  var_map_fid = 'data/var_maps/{}_var_map.json'.format(model_name)
   res_out_fid = OUT_FID.format(model_name)
   res[model_name] = prep_data_run_naive_bayes( train_data, res_out_fid, model_name, save=False )
 

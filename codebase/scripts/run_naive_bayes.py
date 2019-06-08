@@ -1,10 +1,10 @@
 import random
 
-from utils import *
-from params import * 
+from core.utils import *
+from core.params import * 
 
-import ml_models.NaiveBayes
-from naive_bayes_utils import *
+import models.NaiveBayes
+from core.naive_bayes_utils import *
 
 # a script to consolidate training and prediction of naive bayes
 

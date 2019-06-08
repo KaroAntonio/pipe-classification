@@ -149,3 +149,8 @@ DEV :: Dec 10, 2017
 
 hours 2 more (at 11:40)
 
+----------------------------------------------------------------
+
+DEV :: June 8, 2019
+
+restructured codebase to keep only top level scripts in root dir

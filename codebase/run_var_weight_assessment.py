@@ -1,14 +1,15 @@
 import random
 
-from utils import *
-from params import * 
+from core.utils import *
+from core.params import * 
 
-import ml_models.NaiveBayes
-from naive_bayes_utils import *
-from assess_naive_bayes import *
+import models.NaiveBayes
+from core.naive_bayes_utils import *
+
+# Script to run assessment on vars to determine which contributes most to prediction
 
 DATA_FID = 'data/csv/all_data.csv'
-VAR_MAP_FID = 'var_maps/mitigation_var_map.json'
+VAR_MAP_FID = 'data/var_maps/mitigation_var_map.json'
 OUT_FID = 'out/var_weights.csv'
 
 data = load_prep_data( DATA_FID )
