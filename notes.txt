@@ -154,3 +154,22 @@ hours 2 more (at 11:40)
 DEV :: June 8, 2019
 
 restructured codebase to keep only top level scripts in root dir
+Are run_var_weight_assessment.py and run_determine_best_vars.py doing the same thing??
+no they are not! (1) determines the weight (relative importance) of vars, while determine best vars determines which vars to use. 
+
+hours 1
+
+----------------------------------------------------------------
+
+DEV :: June 9, 2019
+
+starting @ 11:19
+
+trying to understand what a probability density function of this is wrt to the model. 
+ok there is what a pdf is but what i understand ramona to be asking is perhaps a little different:
+So it seems that she's asking: what is the probability that the model predicts output 1 given inputs: A, B, C
+this will always be a 100% probability for one of the labels and 0% for the rest
+
+but likely she's asking what is the probability that the model has learned that it then uses to chose the output label
+
+

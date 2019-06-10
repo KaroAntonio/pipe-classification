@@ -11,9 +11,9 @@ from core.naive_bayes_utils import *
 TRAINING_FID = 'data/csv/all_data.csv'
 OUT_FID = 'out/naive_bayes_{}_2019.csv'
 MODEL_NAMES = [
-	'performance',
-	'criticality',
-	'condition',
+	#'performance',
+	#'criticality',
+	#'condition',
 	'mitigation'
 	]
 

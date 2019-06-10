@@ -111,7 +111,7 @@ def label_predictions(p,data):
 			try:
 				pred = model.predict(row)
 			except:
-				print('FAILED',attr_vals, row['label'])
+				print('PREDICITON FAILED',attr_vals, row['label'])
 	
 			pred_label = predicted_label(pred)
 			
@@ -267,32 +267,30 @@ def assess_acc_n(p, data, n):
 		runs += [label_predictions(p,data)]
 	return sum(runs)/float(n)
 
-
 def determine_best_vars(p, data):
-	# assume params are prepped
-	# returns acc, best_vars
-	
-	out_var = p['var_map']['out']	
-	var_map = p['var_map']
-	vars = [v for k,v in p['var_map'].items() if k != 'out']
+  # assume params are prepped
+  # returns acc, best_vars
+  out_var = p['var_map']['out']	
+  var_map = p['var_map']
+  vars = [v for k,v in p['var_map'].items() if k != 'out']
 
-	combs = all_combinations(vars)
+  combs = all_combinations(vars)
 
-	best_comb = None
-	best_acc = 0
+  best_comb = None
+  best_acc = 0
 
-	for c in combs:	
-		p['var_map'] = {i:e for i,e in enumerate(c)}
-		p['var_map']['out'] = out_var
-		acc = assess_acc_n(p, data, 1)
-		print('{:1.3f} => {}'.format(acc, c))
-		if acc > best_acc:
-			best_acc = acc
-			best_comb = c
+  for c in combs:	
+    p['var_map'] = {i:e for i,e in enumerate(c)}
+    p['var_map']['out'] = out_var
+    acc = assess_acc_n(p, data, 1)
+    print('{:1.3f} => {}'.format(acc, c))
+    if acc > best_acc:
+      best_acc = acc
+      best_comb = c
 
-	p['var_map'] = var_map	
+  p['var_map'] = var_map	
 
-	return acc, best_comb
+  return acc, best_comb
 
 def normalize_weights(var_weights):
 	vars = var_weights.values()
@@ -302,30 +300,57 @@ def normalize_weights(var_weights):
 	for var, weight in var_weights.items():
 		var_weights[var] = (weight - min_weight)  / (max_weight - min_weight)
 	return var_weights
-	
+
+def gen_attval_combinations(attvals, combs=[]): 
+  if len(attvals) == 0: 
+    return combs
+
+  # choose att
+  att = attvals.keys()[0]
+  new_combs = []
+  if len(combs) == 0:
+    new_combs = [{att:v} for v in attvals[att]]
+  else:
+    for v in attvals[att]:
+      for c in combs:
+        new_c = c.copy()
+        new_c[att] = v
+        new_combs.append(new_c)
+  new_attvals = attvals.copy()
+  del new_attvals[att]
+  return gen_attval_combinations(new_attvals,new_combs)
+
+def extract_pdf(p):
+  # given that p is a parameter set including an already trained model
+  attvals = p['nb_model'].attvals  
+  attval_combs = gen_attval_combinations(attvals)
+  for c in attval_combs:
+    pred = p['nb_model'].predict({'attributes':c})
+    c.update(pred)
+  return attval_combs
 
 def determine_var_weights(p, data):
-	'''
-	calc the acc for model with each of the vars dropped
-	'''
+  '''
+  calc the acc for model with each of the vars dropped
+  '''
 
-	out_var = p['var_map']['out']
-        var_map = p['var_map']
-        vars = [v for k,v in p['var_map'].items() if k != 'out']
+  out_var = p['var_map']['out']
+  var_map = p['var_map']
+  model_vars = [v for k,v in p['var_map'].items() if k != 'out']
 
-	var_weights = {}	
-	for var in vars:
-		var_map = { i:e for i,e in enumerate(vars) if e != var }
-		var_map['out'] = out_var
-		p['var_map'] = var_map
+  var_weights = {}	
+  for var in model_vars:
+    var_map = { i:e for i,e in enumerate(model_vars) if e != var }
+    var_map['out'] = out_var
+    p['var_map'] = var_map
 
-		acc = assess_acc_n(p, data, 1)
-		var_weights[var] = round(acc, 4)
-		print('{:1.3f} => {}'.format(acc, var_map))
+    acc = assess_acc_n(p, data, 1)
+    var_weights[var] = round(acc, 4)
+    print('{:1.3f} => {}'.format(acc, var_map))
 
-	var_weights = normalize_weights(var_weights)
-	var_weights = {var:round(1-weight,4) for var, weight in var_weights.items()}
-	return var_weights 
+  var_weights = normalize_weights(var_weights)
+  var_weights = {var:round(1-weight,4) for var, weight in var_weights.items()}
+  return var_weights 
 	
 def save_var_map(var_map, var_map_name):
 	with open('var_maps/'+var_map_name,'w') as f:
@@ -337,7 +362,3 @@ def determine_save_best_vars(p, data, out_fid):
 	best_var_map['out'] = p['var_map']['out']
 	save_var_map(best_var_map,out_fid)
 	
-
-
-
-
