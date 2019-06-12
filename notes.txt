@@ -172,4 +172,15 @@ this will always be a 100% probability for one of the labels and 0% for the rest
 
 but likely she's asking what is the probability that the model has learned that it then uses to chose the output label
 
+end @ 2:30
 
+hours 3
+ 
+----------------------------------------------------------------
+
+DEV :: June 12, 2019
+
+incorporating ramona's new data to be used for the models which hopefully reduces the variable space
+rounded the pdf variables to 5th dec place for readibility. 
+
+hours 1.5

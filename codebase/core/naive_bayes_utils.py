@@ -209,7 +209,7 @@ def predicted_label(pred):
 			pred_label = label
 	return pred_label
 
-def prep_data_run_naive_bayes( train_data, out_fid, model_name, save=True ):
+def prep_data_run_naive_bayes( train_data,out_fid,model_name,save=True,verbose=False ):
 
   # These are the methods to prep and run naive bayes
   #data = load_data( train_fid )
@@ -232,8 +232,9 @@ def prep_data_run_naive_bayes( train_data, out_fid, model_name, save=True ):
 
   acc = label_predictions(p,data)
 
-  print('var map: {}'.format(var_map_fid))
-  print('{} acc: {} '.format(p['model_name'],acc))
+  if verbose: 
+    print('var map: {}'.format(var_map_fid))
+  print('{} accuracy: {} '.format(p['model_name'],acc))
   #print('acc: {} '.format(acc))
 
   cols = ['FID']
@@ -245,11 +246,12 @@ def prep_data_run_naive_bayes( train_data, out_fid, model_name, save=True ):
   # restore FIDs
   for row,row_fid in zip(data,row_fids):
     row['FID'] = row_fid
-
-  print('Output Distribution:')
-  print(get_attr_val_counts(data, p['out']))
-  print('Prediction Distribution:')
-  print(get_attr_val_counts(data, '{}_pred'.format(model_name)))
+ 
+  if verbose: 
+    print('Output Distribution:')
+    print(get_attr_val_counts(data, p['out']))
+    print('Prediction Distribution:')
+    print(get_attr_val_counts(data, '{}_pred'.format(model_name)))
 
   if save: format_save_data(p,data,cols,out_fid=out_fid)
 
@@ -293,12 +295,12 @@ def determine_best_vars(p, data):
   return acc, best_comb
 
 def normalize_weights(var_weights):
-	vars = var_weights.values()
-	max_weight = max(vars)
-	min_weight = min(vars)
+	vals = var_weights.values()
+	max_weight = max(vals)
+	min_weight = min(vals)
 	
 	for var, weight in var_weights.items():
-		var_weights[var] = (weight - min_weight)  / (max_weight - min_weight)
+		var_weights[var] = (weight-min_weight)  / (max_weight-min_weight+.000001)
 	return var_weights
 
 def gen_attval_combinations(attvals, combs=[]): 
@@ -320,13 +322,23 @@ def gen_attval_combinations(attvals, combs=[]):
   del new_attvals[att]
   return gen_attval_combinations(new_attvals,new_combs)
 
+def as_ratio(row):
+  s = sum([float(v) for v in row.values()])
+  row_ = {}
+  for k,v in row.items():
+    row_[k] = round(0 if not s else v/s, 5)
+  return row_
+
 def extract_pdf(p):
   # given that p is a parameter set including an already trained model
   attvals = p['nb_model'].attvals  
   attval_combs = gen_attval_combinations(attvals)
   for c in attval_combs:
     pred = p['nb_model'].predict({'attributes':c})
+    pred = as_ratio(pred)
     c.update(pred)
+  attrs = p['nb_model'].attributes  
+  attval_combs.sort(key=lambda r: ','.join([str(r[a]) for a in attrs]))
   return attval_combs
 
 def determine_var_weights(p, data):

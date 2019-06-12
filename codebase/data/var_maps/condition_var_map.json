@@ -1,7 +1,7 @@
 {
-	"rl":"RSL",
-	"tb":"TotBrks",
-	"rb":"BRKS_FVYRS",
-	"mi":"MI",
+	"rl":"RSL_SCR",
+	"tb":"BRK_SCR",
+	"rb":"BRKS_FVYRS_SCR",
+	"mi":"MI_SCR",
 	"out":"TARGET_Condition_level"
 }

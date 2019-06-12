@@ -1,5 +1,5 @@
 {
-	"pd": "DIAMETER",
+	"pd": "DIA_SCR",
 	"es": "ENVMT_SCR",
 	"ac": "ACCESS_SCR",
 	"out": "TARGET_Criticality_Level"

@@ -111,30 +111,30 @@ def get_attr_stats( attr_vals ):
 	return attr_stats
 
 def bucketize_data(data, n=10):
-        '''
-        for each attribute, adjust it to fall into n buckets
-                if there are more than n unique vals
-        '''
+  '''
+  for each attribute, adjust it to fall into n buckets
+  if there are more than n unique vals
+  '''
 
-        b_data = []
+  b_data = []
 
-        attr_vals, attr_types = assess_attr( data )
-	attr_stats = get_attr_stats( attr_vals )
+  attr_vals, attr_types = assess_attr( data )
+  attr_stats = get_attr_stats( attr_vals )
 
-        for row in data:
-                b_row = {}
-                for attr,val in row.items():
-                        if attr_stats[attr]['n'] > n:
-                                val_min = attr_stats[attr]['min']
-                                val_range = attr_stats[attr]['range']
-                                bucket_size = val_range / float(n)
-                                b_val = round(((val-val_min)/val_range)*n)*bucket_size
-                                b_row[attr] = b_val
-			else:
-				b_row[attr] = val
-                b_data.append(b_row)
+  for row in data:
+    b_row = {}
+    for attr,val in row.items():
+      if attr_stats[attr]['n'] > n:
+        val_min = attr_stats[attr]['min']
+        val_range = attr_stats[attr]['range']
+        bucket_size = val_range / float(n)
+        b_val = round(((val-val_min)/val_range)*n)*bucket_size
+        b_row[attr] = b_val
+      else:
+        b_row[attr] = val
+    b_data.append(b_row)
 
-        return b_data
+  return b_data
 
 def get_attr_val_counts(data, attr):
 	'''

@@ -11,9 +11,9 @@ from core.naive_bayes_utils import *
 TRAINING_FID = 'data/csv/all_data.csv'
 OUT_FID = 'out/naive_bayes_{}_2019.csv'
 MODEL_NAMES = [
-	#'performance',
-	#'criticality',
-	#'condition',
+	'performance',
+	'criticality',
+	'condition',
 	'mitigation'
 	]
 
@@ -47,6 +47,11 @@ for model_name in MODEL_NAMES:
   var_map_fid = 'data/var_maps/{}_var_map.json'.format(model_name)
   res_out_fid = OUT_FID.format(model_name)
   res[model_name] = prep_data_run_naive_bayes( train_data, res_out_fid, model_name, save=False )
+  ## extract and save pdfs
+  pdf = extract_pdf(res[model_name])
+  pdf_fid = 'out/{}_pdf.csv'.format(model_name)
+  fieldnames = sorted(pdf[0].keys())
+  save_data(pdf_fid, pdf, fieldnames)
 
 print('Saving All Model Output: {}'.format('out/naive_bayes_all_models.csv'))
 fid_map = output_joint_models( res )
